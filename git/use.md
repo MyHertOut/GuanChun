@@ -61,7 +61,7 @@ git switch main              # 切换到主分支（新语法）
 ```bash
 git merge feature-login      # 合并分支
 git merge --no-ff feature    # 强制创建合并提交
-git merge --squash feature   # 压缩合并
+git merge --squash feature   # 压缩合并 会将feature分支上的所有提交 压缩成一个单独的提交 ，然后合并到当前分支。
 ```
 **应用场景**: 将功能分支合并到主分支
 
@@ -86,7 +86,7 @@ git remote remove origin     # 删除远程仓库
 ```bash
 git fetch origin             # 获取远程更新
 git pull origin main         # 拉取并合并
-git pull --rebase origin main # 变基拉取
+git pull --rebase origin main # 变基拉取 会将feature分支上的所有提交 应用到当前分支上。
 git push origin main         # 推送到远程
 git push -u origin feature   # 推送新分支并设置跟踪
 ```
@@ -96,9 +96,9 @@ git push -u origin feature   # 推送新分支并设置跟踪
 
 ### 变基操作
 ```bash
-git rebase main              # 将当前分支变基到main
-git rebase -i HEAD~3         # 交互式变基最近3个提交
-git rebase --continue        # 继续变基
+git rebase main              # 将当前分支变基到main 分支
+git rebase -i HEAD~3         # 交互式变基最近3个提交 可以选择哪些提交应用到当前分支上。
+git rebase --continue        # 继续变基 
 git rebase --abort           # 中止变基
 ```
 **应用场景**: 整理提交历史、解决冲突
