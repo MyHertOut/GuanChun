@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螺旋粒子效果 - 类似图片风格</title>
+    <style>
+        /**
+         * 螺旋粒子效果专用样式
+         * 实现深空背景和发光效果
+         */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .control-item {
+            margin-bottom: 10px;
+        }
+
+        .control-item label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .control-item input {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="controls">
+        <div class="control-item">
+            <label>粒子数量: <span id="particle-count-value">5000</span></label>
+            <input type="range" id="particle-count" min="1000" max="10000" value="5000">
+        </div>
+        <div class="control-item">
+            <label>旋转速度: <span id="rotation-speed-value">1</span></label>
+            <input type="range" id="rotation-speed" min="0.1" max="3" step="0.1" value="1">
+        </div>
+        <div class="control-item">
+            <label>螺旋密度: <span id="spiral-density-value">3</span></label>
+            <input type="range" id="spiral-density" min="1" max="8" step="0.5" value="3">
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="spiral-particles.js"></script>
+</body>
+</html>
