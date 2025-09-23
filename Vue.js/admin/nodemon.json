@@ -1,0 +1,22 @@
+{
+  "watch": [
+    "src/"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    "coverage/",
+    "logs/",
+    "*.test.js",
+    "*.spec.js"
+  ],
+  "exec": "node src/app.js",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000,
+  "verbose": true,
+  "colours": true
+}
