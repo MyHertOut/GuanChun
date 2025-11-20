@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>浏览器渲染底层逻辑可视化 Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Courier New", monospace;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        text-align: center;
+        color: #667eea;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+      }
+
+      .controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      button {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: white;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn-start {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .btn-step {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      .btn-reset {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      .stage-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .stage {
+        border: 3px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: #f8fafc;
+        min-height: 300px;
+        transition: all 0.3s;
+      }
+
+      .stage.active {
+        border-color: #667eea;
+        background: #ebf4ff;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .stage h2 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .stage-content {
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .tree-node {
+        margin-left: 1.5rem;
+        padding: 0.5rem;
+        border-left: 2px solid #cbd5e0;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.4s;
+      }
+
+      .tree-node.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .tree-node-name {
+        color: #2d3748;
+        font-weight: bold;
+      }
+
+      .tree-node-type {
+        color: #718096;
+        font-size: 0.85rem;
+      }
+
+      .css-rule {
+        background: #1a202c;
+        color: #68d391;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        border-radius: 4px;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.4s;
+      }
+
+      .css-rule.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .render-item {
+        background: white;
+        border: 2px solid #667eea;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: all 0.4s;
+      }
+
+      .render-item.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .layout-box {
+        border: 2px dashed #4299e1;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        position: relative;
+        opacity: 0;
+        transition: all 0.5s;
+      }
+
+      .layout-box.visible {
+        opacity: 1;
+      }
+
+      .layout-info {
+        font-size: 0.75rem;
+        color: #4299e1;
+        position: absolute;
+        top: -20px;
+        right: 5px;
+        background: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+
+      .paint-layer {
+        background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        border: 2px solid #667eea;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        opacity: 0;
+        transition: all 0.5s;
+      }
+
+      .paint-layer.visible {
+        opacity: 1;
+        animation: paintPulse 1s ease-in-out;
+      }
+
+      @keyframes paintPulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .composite-layer {
+        background: white;
+        border: 3px solid #48bb78;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s;
+      }
+
+      .composite-layer.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .final-render {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        border: 3px solid #48bb78;
+        min-height: 300px;
+      }
+
+      .final-render h2 {
+        color: #48bb78;
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .rendered-content {
+        opacity: 0;
+        transition: opacity 1s;
+      }
+
+      .rendered-content.visible {
+        opacity: 1;
+      }
+
+      .step-indicator {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #667eea;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #ebf4ff;
+        border-radius: 8px;
+      }
+
+      .code-sample {
+        background: #1a202c;
+        color: #68d391;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+      }
+
+      .highlight {
+        animation: highlight 0.8s ease-in-out;
+      }
+
+      @keyframes highlight {
+        0%,
+        100% {
+          background-color: transparent;
+        }
+        50% {
+          background-color: #fef3c7;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 浏览器渲染底层逻辑可视化</h1>
+
+      <div class="code-sample">
+        <div>📄 源HTML代码：</div>
+        <pre>
+&lt;div class="container"&gt;
+  &lt;h1 class="title"&gt;Hello World&lt;/h1&gt;
+  &lt;p class="text"&gt;这是一段文本&lt;/p&gt;
+&lt;/div&gt;</pre
+        >
+      </div>
+
+      <div class="controls">
+        <button class="btn-start" onclick="runFullDemo()">▶️ 自动演示</button>
+        <button class="btn-step" onclick="nextStep()">⏭️ 单步执行</button>
+        <button class="btn-reset" onclick="resetDemo()">🔄 重置</button>
+      </div>
+
+      <div class="step-indicator" id="stepIndicator">
+        准备开始...点击"自动演示"或"单步执行"
+      </div>
+
+      <div class="stage-container">
+        <!-- Stage 1: HTML Parsing & DOM -->
+        <div class="stage" id="stage1">
+          <h2>1️⃣ HTML 解析 → DOM 树</h2>
+          <div class="stage-content" id="domContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              HTML 解析器将字节流转换为 DOM 树...
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2: CSS Parsing & CSSOM -->
+        <div class="stage" id="stage2">
+          <h2>2️⃣ CSS 解析 → CSSOM</h2>
+          <div class="stage-content" id="cssomContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              CSS 解析器构建 CSSOM 树...
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 3: Render Tree -->
+        <div class="stage" id="stage3">
+          <h2>3️⃣ 构建渲染树</h2>
+          <div class="stage-content" id="renderTreeContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              合并 DOM 和 CSSOM...
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 4: Layout -->
+        <div class="stage" id="stage4">
+          <h2>4️⃣ Layout (布局)</h2>
+          <div class="stage-content" id="layoutContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              计算元素的几何信息...
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 5: Paint -->
+        <div class="stage" id="stage5">
+          <h2>5️⃣ Paint (绘制)</h2>
+          <div class="stage-content" id="paintContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              生成绘制指令...
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 6: Composite -->
+        <div class="stage" id="stage6">
+          <h2>6️⃣ Composite (合成)</h2>
+          <div class="stage-content" id="compositeContent">
+            <div style="margin-bottom: 1rem; color: #718096">
+              合成图层到屏幕...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Render -->
+      <div class="final-render">
+        <h2>🖥️ 最终渲染结果</h2>
+        <div class="rendered-content" id="finalRender">
+          <div style="text-align: center; color: #a0aec0; padding: 4rem">
+            等待渲染完成...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentStep = 0;
+      let autoPlayInterval = null;
+
+      const steps = [
+        {
+          name: "HTML 解析 → DOM 树构建",
+          execute: buildDOM,
+        },
+        {
+          name: "CSS 解析 → CSSOM 构建",
+          execute: buildCSSOM,
+        },
+        {
+          name: "合并 DOM 和 CSSOM → Render Tree",
+          execute: buildRenderTree,
+        },
+        {
+          name: "Layout 计算几何信息",
+          execute: performLayout,
+        },
+        {
+          name: "Paint 生成绘制指令",
+          execute: performPaint,
+        },
+        {
+          name: "Composite 合成到屏幕",
+          execute: performComposite,
+        },
+      ];
+
+      function updateStepIndicator() {
+        const indicator = document.getElementById("stepIndicator");
+        if (currentStep < steps.length) {
+          indicator.textContent = `步骤 ${currentStep + 1}/${steps.length}: ${
+            steps[currentStep].name
+          }`;
+        } else {
+          indicator.textContent = "✅ 渲染完成！";
+        }
+      }
+
+      function buildDOM() {
+        const stage = document.getElementById("stage1");
+        const content = document.getElementById("domContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            HTML 解析器逐字符读取，生成 Token，构建 DOM 树：
+          </div>
+          <div class="tree-node" id="dom-root">
+            <div class="tree-node-name">Document</div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          const root = document.getElementById("dom-root");
+          root.innerHTML += `
+            <div class="tree-node visible" style="transition-delay: 0.1s">
+              <div class="tree-node-name">&lt;div class="container"&gt;</div>
+              <div class="tree-node-type">HTMLDivElement</div>
+              <div class="tree-node visible" style="transition-delay: 0.3s">
+                <div class="tree-node-name">&lt;h1 class="title"&gt;</div>
+                <div class="tree-node-type">HTMLHeadingElement</div>
+                <div class="tree-node visible" style="transition-delay: 0.5s">
+                  <div class="tree-node-type">#text: "Hello World"</div>
+                </div>
+              </div>
+              <div class="tree-node visible" style="transition-delay: 0.7s">
+                <div class="tree-node-name">&lt;p class="text"&gt;</div>
+                <div class="tree-node-type">HTMLParagraphElement</div>
+                <div class="tree-node visible" style="transition-delay: 0.9s">
+                  <div class="tree-node-type">#text: "这是一段文本"</div>
+                </div>
+              </div>
+            </div>
+          `;
+          root.classList.add("visible");
+        }, 100);
+      }
+
+      function buildCSSOM() {
+        const prevStage = document.getElementById("stage1");
+        prevStage.classList.remove("active");
+
+        const stage = document.getElementById("stage2");
+        const content = document.getElementById("cssomContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            CSS 解析器解析样式规则，构建 CSSOM：
+          </div>
+        `;
+
+        const rules = [
+          { selector: ".container", props: "width: 800px; margin: auto;" },
+          { selector: ".title", props: "font-size: 32px; color: #667eea;" },
+          { selector: ".text", props: "font-size: 16px; color: #333;" },
+        ];
+
+        rules.forEach((rule, index) => {
+          setTimeout(() => {
+            content.innerHTML += `
+              <div class="css-rule visible" style="transition-delay: ${
+                index * 0.2
+              }s">
+                <div><strong>${rule.selector}</strong> {</div>
+                <div style="margin-left: 1rem;">${rule.props}</div>
+                <div>}</div>
+              </div>
+            `;
+          }, index * 400);
+        });
+      }
+
+      function buildRenderTree() {
+        const prevStage = document.getElementById("stage2");
+        prevStage.classList.remove("active");
+
+        const stage = document.getElementById("stage3");
+        const content = document.getElementById("renderTreeContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            合并 DOM 和 CSSOM，创建渲染树（只包含可见元素）：
+          </div>
+        `;
+
+        const items = [
+          { tag: "div.container", styles: "width: 800px, margin: auto" },
+          { tag: "h1.title", styles: "font-size: 32px, color: #667eea" },
+          { tag: "p.text", styles: "font-size: 16px, color: #333" },
+        ];
+
+        items.forEach((item, index) => {
+          setTimeout(() => {
+            content.innerHTML += `
+              <div class="render-item visible" style="transition-delay: ${
+                index * 0.2
+              }s">
+                <div style="font-weight: bold; color: #667eea;">${
+                  item.tag
+                }</div>
+                <div style="font-size: 0.85rem; color: #718096; margin-top: 0.3rem;">
+                  计算样式: ${item.styles}
+                </div>
+              </div>
+            `;
+          }, index * 400);
+        });
+      }
+
+      function performLayout() {
+        const prevStage = document.getElementById("stage3");
+        prevStage.classList.remove("active");
+
+        const stage = document.getElementById("stage4");
+        const content = document.getElementById("layoutContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            从根节点遍历，计算每个元素的精确位置和尺寸（盒模型）：
+          </div>
+        `;
+
+        const boxes = [
+          { name: "div.container", box: "x:0, y:0, w:800px, h:200px" },
+          { name: "h1.title", box: "x:0, y:0, w:800px, h:50px" },
+          { name: "p.text", box: "x:0, y:50, w:800px, h:30px" },
+        ];
+
+        boxes.forEach((box, index) => {
+          setTimeout(() => {
+            content.innerHTML += `
+              <div class="layout-box visible" style="transition-delay: ${
+                index * 0.2
+              }s">
+                <div class="layout-info">${box.box}</div>
+                <div style="font-weight: bold; color: #4299e1;">${
+                  box.name
+                }</div>
+                <div style="font-size: 0.8rem; color: #718096; margin-top: 0.3rem;">
+                  计算: 盒模型、定位、浮动、文本换行
+                </div>
+              </div>
+            `;
+          }, index * 500);
+        });
+      }
+
+      function performPaint() {
+        const prevStage = document.getElementById("stage4");
+        prevStage.classList.remove("active");
+
+        const stage = document.getElementById("stage5");
+        const content = document.getElementById("paintContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            生成绘制指令列表（Draw Calls），转换为像素：
+          </div>
+        `;
+
+        const drawCalls = [
+          "绘制 div.container 背景",
+          "绘制 h1.title 文字（Hello World）",
+          "绘制 p.text 文字（这是一段文本）",
+        ];
+
+        drawCalls.forEach((call, index) => {
+          setTimeout(() => {
+            content.innerHTML += `
+              <div class="paint-layer visible" style="transition-delay: ${
+                index * 0.2
+              }s">
+                <div style="font-size: 0.9rem;">
+                  📝 ${call}
+                </div>
+              </div>
+            `;
+          }, index * 500);
+        });
+      }
+
+      function performComposite() {
+        const prevStage = document.getElementById("stage5");
+        prevStage.classList.remove("active");
+
+        const stage = document.getElementById("stage6");
+        const content = document.getElementById("compositeContent");
+        stage.classList.add("active");
+
+        content.innerHTML = `
+          <div style="margin-bottom: 1rem; color: #718096;">
+            合成线程将各个图层合成，发送到 GPU 显示：
+          </div>
+        `;
+
+        const layers = [
+          "Layer 0: 主图层（包含 div.container）",
+          "Layer 1: 文本图层（h1 + p）",
+        ];
+
+        layers.forEach((layer, index) => {
+          setTimeout(() => {
+            content.innerHTML += `
+              <div class="composite-layer visible" style="transition-delay: ${
+                index * 0.2
+              }s">
+                <div style="font-weight: bold; color: #48bb78;">🎨 ${layer}</div>
+                <div style="font-size: 0.85rem; color: #718096; margin-top: 0.3rem;">
+                  在 GPU 上合成
+                </div>
+              </div>
+            `;
+          }, index * 400);
+        });
+
+        // Show final render
+        setTimeout(() => {
+          const finalRender = document.getElementById("finalRender");
+          finalRender.innerHTML = `
+            <div style="width: 800px; margin: auto; padding: 2rem; border: 2px solid #e2e8f0; border-radius: 8px; background: white;">
+              <h1 style="font-size: 32px; color: #667eea; margin-bottom: 1rem;">Hello World</h1>
+              <p style="font-size: 16px; color: #333;">这是一段文本</p>
+            </div>
+            <div style="text-align: center; margin-top: 2rem; color: #48bb78; font-weight: bold;">
+              ✨ 渲染完成！每秒 60 帧持续刷新
+            </div>
+          `;
+          finalRender.classList.add("visible");
+        }, 1000);
+      }
+
+      function nextStep() {
+        if (currentStep < steps.length) {
+          steps[currentStep].execute();
+          currentStep++;
+          updateStepIndicator();
+        }
+      }
+
+      function runFullDemo() {
+        resetDemo();
+        autoPlayInterval = setInterval(() => {
+          if (currentStep < steps.length) {
+            nextStep();
+          } else {
+            clearInterval(autoPlayInterval);
+          }
+        }, 2500);
+      }
+
+      function resetDemo() {
+        if (autoPlayInterval) {
+          clearInterval(autoPlayInterval);
+        }
+        currentStep = 0;
+        updateStepIndicator();
+
+        // Reset all stages
+        document.querySelectorAll(".stage").forEach((stage) => {
+          stage.classList.remove("active");
+        });
+
+        // Reset content
+        document.getElementById("domContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">HTML 解析器将字节流转换为 DOM 树...</div>';
+        document.getElementById("cssomContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">CSS 解析器构建 CSSOM 树...</div>';
+        document.getElementById("renderTreeContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">合并 DOM 和 CSSOM...</div>';
+        document.getElementById("layoutContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">计算元素的几何信息...</div>';
+        document.getElementById("paintContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">生成绘制指令...</div>';
+        document.getElementById("compositeContent").innerHTML =
+          '<div style="margin-bottom: 1rem; color: #718096;">合成图层到屏幕...</div>';
+
+        const finalRender = document.getElementById("finalRender");
+        finalRender.classList.remove("visible");
+        finalRender.innerHTML =
+          '<div style="text-align: center; color: #a0aec0; padding: 4rem;">等待渲染完成...</div>';
+      }
+
+      // Initialize
+      updateStepIndicator();
+    </script>
+  </body>
+</html>

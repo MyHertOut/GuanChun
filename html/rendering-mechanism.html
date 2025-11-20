@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>浏览器渲染机制深度解析 | 可视化演示</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: #333;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      header p {
+        font-size: 1.2rem;
+        opacity: 0.95;
+      }
+
+      main {
+        padding: 3rem 2rem;
+      }
+
+      .section {
+        margin-bottom: 4rem;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border-left: 6px solid #667eea;
+      }
+
+      h2 {
+        color: #667eea;
+        font-size: 2.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      h3 {
+        color: #764ba2;
+        font-size: 1.6rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .pipeline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .pipeline-step {
+        flex: 1;
+        min-width: 150px;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+      }
+
+      .pipeline-step:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .pipeline-step::after {
+        content: "→";
+        position: absolute;
+        right: -1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .pipeline-step:last-child::after {
+        display: none;
+      }
+
+      .pipeline-step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        line-height: 30px;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      .pipeline-step-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .pipeline-step-desc {
+        font-size: 0.85rem;
+        opacity: 0.9;
+      }
+
+      .demo-container {
+        margin: 2rem 0;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+      }
+
+      .demo-button {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+      }
+
+      .demo-button.reflow {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .demo-button.repaint {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+      }
+
+      .demo-button.composite {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+      }
+
+      .demo-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .demo-box {
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 2rem auto;
+        transition: all 0.3s;
+      }
+
+      .performance-monitor {
+        background: #1a202c;
+        color: #68d391;
+        padding: 2rem;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        margin: 2rem 0;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .log-entry {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: rgba(104, 211, 145, 0.1);
+        border-left: 3px solid #68d391;
+        border-radius: 4px;
+      }
+
+      .log-time {
+        color: #90cdf4;
+        font-weight: bold;
+      }
+
+      .log-type-reflow {
+        color: #fc8181;
+      }
+
+      .log-type-repaint {
+        color: #90cdf4;
+      }
+
+      .log-type-composite {
+        color: #68d391;
+      }
+
+      .timeline {
+        position: relative;
+        padding: 2rem 0;
+      }
+
+      .timeline-item {
+        position: relative;
+        padding-left: 3rem;
+        margin-bottom: 2rem;
+        border-left: 3px solid #e2e8f0;
+      }
+
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: #667eea;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #e2e8f0;
+      }
+
+      .timeline-content {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .timeline-title {
+        color: #667eea;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .code-block {
+        background: #1a202c;
+        color: #68d391;
+        padding: 1.5rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1rem 0;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+      }
+
+      .highlight-box {
+        background: #fff5f5;
+        border-left: 4px solid #fc8181;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 4px;
+      }
+
+      .highlight-box.info {
+        background: #ebf8ff;
+        border-left-color: #4299e1;
+      }
+
+      .highlight-box.success {
+        background: #f0fff4;
+        border-left-color: #48bb78;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+      }
+
+      .comparison-card {
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+      }
+
+      .comparison-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .comparison-card h4 {
+        color: #2d3748;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+      }
+
+      .comparison-card ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .comparison-card li {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+      }
+
+      .comparison-card li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #48bb78;
+        font-weight: bold;
+      }
+
+      .visual-demo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
+      }
+
+      @media (max-width: 768px) {
+        .visual-demo {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      canvas {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .interactive-section {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+      }
+
+      .fps-counter {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #68d391;
+        padding: 1rem;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 1.2rem;
+        z-index: 1000;
+        min-width: 150px;
+      }
+
+      .fps-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #48bb78;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="fps-counter" id="fpsCounter">
+      <div>FPS: <span class="fps-value" id="fpsValue">60</span></div>
+      <div style="font-size: 0.8rem; margin-top: 0.5rem">实时帧率监测</div>
+    </div>
+
+    <div class="container">
+      <header>
+        <h1>🚀 浏览器渲染机制深度解析</h1>
+        <p>从 HTML 到像素：完整的渲染流程可视化演示</p>
+      </header>
+
+      <main>
+        <!-- 第一部分：解析流程 -->
+        <section class="section">
+          <h2>📖 第一阶段：HTML 解析流程</h2>
+          <p>当浏览器接收到 HTML 文档时，会经历以下转换过程：</p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-content">
+                <div class="timeline-title">1. 字节流 (Bytes)</div>
+                <p>
+                  浏览器通过网络接收 HTML
+                  文件的原始字节数据。这些数据通常以数据包的形式分块到达，浏览器会立即开始处理这些数据，而不会等待整个文件下载完成。
+                </p>
+                <div class="code-block">
+                  3C 68 74 6D 6C 3E 3C 68 65 61 64 3E ...
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-content">
+                <div class="timeline-title">2. 字符转换 (Characters)</div>
+                <p>
+                  根据 HTTP 响应头中的 Content-Type (如 charset=UTF-8)
+                  或文件本身的 BOM
+                  标记，将字节流转换为人类可读的字符。如果未指定编码，浏览器会进行"字符集嗅探"。
+                </p>
+                <div class="code-block">
+                  &lt;html&gt;&lt;head&gt;&lt;title&gt;...
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-content">
+                <div class="timeline-title">3. 令牌化 (Tokenization)</div>
+                <p>
+                  将字符流转换为 HTML
+                  标准定义的令牌（Tokens）。这是一个状态机过程，解析器在"标签打开"、"标签名称"、"属性名称"等状态间切换。
+                </p>
+                <div class="code-block">
+                  StartTag: html<br />
+                  StartTag: head<br />
+                  StartTag: title<br />
+                  Characters: "页面标题"<br />
+                  EndTag: title
+                </div>
+                <div class="highlight-box info">
+                  <strong>💡 关键点：</strong>这个过程由 HTML
+                  解析器（Tokenizer）完成，遵循 WHATWG HTML 规范。即使 HTML
+                  有错误（如缺少闭合标签），解析器也会尝试修复。
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-content">
+                <div class="timeline-title">
+                  4. DOM 树构建 (DOM Tree Construction)
+                </div>
+                <p>
+                  将令牌转换为 DOM 节点，并构建 DOM
+                  树结构。此过程会受到阻塞资源（如同步脚本）的影响，解析器遇到
+                  &lt;script&gt; 时会暂停构建，直到脚本执行完毕。
+                </p>
+                <div class="code-block">
+                  Document<br />
+                  └─ html<br />
+                  &nbsp;&nbsp;&nbsp;├─ head<br />
+                  &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└─ title<br />
+                  &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ #text:
+                  "页面标题"<br />
+                  &nbsp;&nbsp;&nbsp;└─ body<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ div<br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─
+                  #text: "内容"
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 第二部分：关键渲染路径 -->
+        <section class="section">
+          <h2>⚡ 第二阶段：关键渲染路径 (Critical Rendering Path)</h2>
+          <p>
+            DOM
+            树构建完成后，浏览器需要将其转换为屏幕上的像素，这个过程称为关键渲染路径。
+          </p>
+
+          <div class="highlight-box info" style="margin-bottom: 2rem">
+            <strong>🏗️ 现代浏览器的多进程架构：</strong><br />
+            现代浏览器（如 Chrome）采用多进程架构，确保稳定性和安全性：<br /><br />
+            •
+            <strong>浏览器进程 (Browser Process)</strong
+            >：管理界面、网络、存储<br />
+            •
+            <strong>渲染进程 (Renderer Process)</strong
+            >：每个标签页一个，负责渲染<br />
+            &nbsp;&nbsp;├─ <strong>主线程 (Main Thread)</strong>：执行 JS、DOM
+            解析、Layout、Paint<br />
+            &nbsp;&nbsp;├─
+            <strong>合成线程 (Compositor Thread)</strong>：处理图层合成<br />
+            &nbsp;&nbsp;└─
+            <strong>光栅线程 (Raster Thread)</strong>：将图层转换为位图<br />
+            • <strong>GPU 进程</strong>：硬件加速绘制<br />
+            • <strong>插件进程</strong>：沙箱隔离插件
+          </div>
+
+          <div class="pipeline">
+            <div class="pipeline-step" onclick="showStepDetail('dom')">
+              <div class="pipeline-step-number">1</div>
+              <div class="pipeline-step-title">DOM</div>
+              <div class="pipeline-step-desc">文档对象模型</div>
+            </div>
+
+            <div class="pipeline-step" onclick="showStepDetail('cssom')">
+              <div class="pipeline-step-number">2</div>
+              <div class="pipeline-step-title">CSSOM</div>
+              <div class="pipeline-step-desc">CSS 对象模型</div>
+            </div>
+
+            <div class="pipeline-step" onclick="showStepDetail('render')">
+              <div class="pipeline-step-number">3</div>
+              <div class="pipeline-step-title">Render Tree</div>
+              <div class="pipeline-step-desc">渲染树</div>
+            </div>
+
+            <div class="pipeline-step" onclick="showStepDetail('layout')">
+              <div class="pipeline-step-number">4</div>
+              <div class="pipeline-step-title">Layout</div>
+              <div class="pipeline-step-desc">布局/回流</div>
+            </div>
+
+            <div class="pipeline-step" onclick="showStepDetail('paint')">
+              <div class="pipeline-step-number">5</div>
+              <div class="pipeline-step-title">Paint</div>
+              <div class="pipeline-step-desc">绘制</div>
+            </div>
+
+            <div class="pipeline-step" onclick="showStepDetail('composite')">
+              <div class="pipeline-step-number">6</div>
+              <div class="pipeline-step-title">Composite</div>
+              <div class="pipeline-step-desc">合成</div>
+            </div>
+          </div>
+
+          <div id="stepDetail" class="demo-container" style="display: none">
+            <h3 id="stepTitle"></h3>
+            <div id="stepContent"></div>
+          </div>
+        </section>
+
+        <!-- 第三部分：性能对比 -->
+        <section class="section">
+          <h2>⚖️ 第三阶段：Reflow vs Repaint vs Composite</h2>
+          <p>
+            不同的 CSS
+            属性修改会触发不同程度的重新渲染，性能差异巨大。理解浏览器线程模型是优化的关键。
+          </p>
+
+          <div class="comparison-grid">
+            <div class="comparison-card" style="border-top: 5px solid #fc8181">
+              <h4>🔴 Reflow (回流/重排)</h4>
+              <p><strong>性能影响：</strong>最昂贵 💥</p>
+              <p><strong>涉及线程：</strong>主线程 (Main Thread)</p>
+              <p><strong>触发条件：</strong></p>
+              <ul>
+                <li>改变尺寸（width, height）</li>
+                <li>改变位置（left, top, margin）</li>
+                <li>添加/删除 DOM 元素</li>
+                <li>改变字体大小</li>
+                <li>窗口大小改变</li>
+              </ul>
+              <div class="highlight-box">
+                <strong>⚠️ 危险：</strong
+                >浏览器必须重新计算布局（Layout），这会阻塞主线程上的 JS
+                执行。如果布局复杂，会导致严重的掉帧。
+              </div>
+            </div>
+
+            <div class="comparison-card" style="border-top: 5px solid #4299e1">
+              <h4>🔵 Repaint (重绘)</h4>
+              <p><strong>性能影响：</strong>中等 ⚡</p>
+              <p><strong>涉及线程：</strong>主线程 (Main Thread)</p>
+              <p><strong>触发条件：</strong></p>
+              <ul>
+                <li>改变颜色（color, background-color）</li>
+                <li>改变边框颜色</li>
+                <li>改变透明度 (非合成层)</li>
+                <li>改变阴影</li>
+                <li>改变轮廓</li>
+              </ul>
+              <div class="highlight-box info">
+                <strong>ℹ️ 说明：</strong>跳过了 Layout
+                阶段，但仍需在主线程进行栅格化（Paint）。虽然比 Reflow
+                快，但频繁重绘仍会占用 CPU。
+              </div>
+            </div>
+
+            <div class="comparison-card" style="border-top: 5px solid #48bb78">
+              <h4>🟢 Composite (合成)</h4>
+              <p><strong>性能影响：</strong>最优 🚀</p>
+              <p>
+                <strong>涉及线程：</strong>合成线程 (Compositor Thread) + GPU
+              </p>
+              <p><strong>触发条件：</strong></p>
+              <ul>
+                <li>transform（平移、缩放、旋转）</li>
+                <li>opacity (配合合成层)</li>
+                <li>filter</li>
+                <li>will-change</li>
+              </ul>
+              <div class="highlight-box success">
+                <strong>✅ 最佳实践：</strong>这些属性完全绕过主线程，直接在 GPU
+                上处理。即使主线程被繁重的 JS 任务阻塞，动画依然流畅！
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 第四部分：交互式演示 -->
+        <section class="section">
+          <h2>🎮 第四阶段：交互式性能演示</h2>
+          <p>
+            点击按钮观察不同操作对渲染性能的影响，并在控制台和性能监视器中查看实时数据。
+          </p>
+
+          <div class="interactive-section">
+            <div class="demo-buttons">
+              <button class="demo-button reflow" onclick="triggerReflow()">
+                触发 Reflow (改变尺寸)
+              </button>
+              <button class="demo-button repaint" onclick="triggerRepaint()">
+                触发 Repaint (改变颜色)
+              </button>
+              <button
+                class="demo-button composite"
+                onclick="triggerComposite()"
+              >
+                触发 Composite (transform)
+              </button>
+              <button
+                class="demo-button"
+                style="background: #718096; color: white"
+                onclick="clearLogs()"
+              >
+                清空日志
+              </button>
+            </div>
+
+            <div class="demo-box" id="demoBox">演示盒子</div>
+
+            <div class="performance-monitor" id="performanceMonitor">
+              <div class="log-entry">
+                <span class="log-time">[系统]</span>
+                性能监视器已启动，点击上方按钮查看不同操作的性能影响...
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 第五部分：实际测量 -->
+        <section class="section">
+          <h2>📊 第五阶段：性能测量 API</h2>
+          <p>
+            使用浏览器提供的 Performance API 可以精确测量渲染性能。掌握这些 API
+            是性能优化的基础。
+          </p>
+
+          <h3>1. Navigation Timing API</h3>
+          <p style="line-height: 1.8; margin-bottom: 1rem">
+            Navigation Timing API
+            提供了页面加载过程中各个阶段的精确时间戳，帮助我们定位性能瓶颈。
+          </p>
+
+          <div class="code-block">
+            // 测量关键渲染路径时间<br />
+            window.addEventListener('load', () => {<br />
+            &nbsp;&nbsp;const perfData = performance.timing;<br />
+            &nbsp;&nbsp;const nav = performance.navigation;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 DNS 查询时间<br />
+            &nbsp;&nbsp;const dnsTime = perfData.domainLookupEnd -
+            perfData.domainLookupStart;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 TCP 连接时间<br />
+            &nbsp;&nbsp;const tcpTime = perfData.connectEnd -
+            perfData.connectStart;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 请求响应时间 (TTFB - Time To First Byte)<br />
+            &nbsp;&nbsp;const ttfb = perfData.responseStart -
+            perfData.requestStart;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 内容下载时间<br />
+            &nbsp;&nbsp;const downloadTime = perfData.responseEnd -
+            perfData.responseStart;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 DOM 解析时间 (关键！)<br />
+            &nbsp;&nbsp;const domParse = perfData.domInteractive -
+            perfData.domLoading;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 资源加载时间<br />
+            &nbsp;&nbsp;const resourceLoad = perfData.loadEventStart -
+            perfData.domContentLoadedEventEnd;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;// 🔍 完整页面加载时间<br />
+            &nbsp;&nbsp;const pageLoad = perfData.loadEventEnd -
+            perfData.navigationStart;<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;console.group('⏱️ 页面加载性能分析');<br />
+            &nbsp;&nbsp;console.log(`DNS 查询: ${dnsTime}ms`);<br />
+            &nbsp;&nbsp;console.log(`TCP 连接: ${tcpTime}ms`);<br />
+            &nbsp;&nbsp;console.log(`TTFB: ${ttfb}ms`);<br />
+            &nbsp;&nbsp;console.log(`内容下载: ${downloadTime}ms`);<br />
+            &nbsp;&nbsp;console.log(`DOM 解析: ${domParse}ms`);<br />
+            &nbsp;&nbsp;console.log(`资源加载: ${resourceLoad}ms`);<br />
+            &nbsp;&nbsp;console.log(`总耗时: ${pageLoad}ms`);<br />
+            &nbsp;&nbsp;console.groupEnd();<br />
+            });
+          </div>
+
+          <div class="highlight-box info" style="margin-top: 1.5rem">
+            <strong>📐 关键性能指标（Core Web Vitals）：</strong><br />
+            •
+            <strong>LCP (Largest Contentful Paint)</strong
+            >：最大内容绘制时间，应 &lt; 2.5s<br />
+            • <strong>FID (First Input Delay)</strong>：首次输入延迟，应 &lt;
+            100ms<br />
+            • <strong>CLS (Cumulative Layout Shift)</strong>：累积布局偏移，应
+            &lt; 0.1<br />
+            • <strong>TTFB (Time to First Byte)</strong>：首字节时间，应 &lt;
+            600ms
+          </div>
+
+          <h3 style="margin-top: 2.5rem">2. Performance Observer API</h3>
+          <p style="line-height: 1.8; margin-bottom: 1rem">
+            Performance Observer 是一个强大的观察者
+            API，可以监听各种性能事件，包括长任务、布局偏移、资源加载等。
+          </p>
+
+          <div class="code-block">
+            // 🎯 监测长任务 (Long Tasks)<br />
+            // 长任务定义：执行时间超过 50ms 的任务<br />
+            const longTaskObserver = new PerformanceObserver((list) => {<br />
+            &nbsp;&nbsp;for (const entry of list.getEntries()) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;console.warn(`⚠️ 长任务检测:
+            ${entry.duration.toFixed(2)}ms`);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;console.warn(`起始时间:
+            ${entry.startTime.toFixed(2)}ms`);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;// 长任务会阻塞主线程，导致页面无响应<br />
+            &nbsp;&nbsp;}<br />
+            });<br />
+            longTaskObserver.observe({ entryTypes: ['longtask'] });<br />
+            <br />
+            // 🎯 监测 Layout Shift (布局偏移)<br />
+            let clsScore = 0;<br />
+            const layoutShiftObserver = new PerformanceObserver((list) => {<br />
+            &nbsp;&nbsp;for (const entry of list.getEntries()) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;if (!entry.hadRecentInput) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clsScore += entry.value;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(`📐 布局偏移:
+            ${entry.value.toFixed(4)}`);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log(`累积 CLS:
+            ${clsScore.toFixed(4)}`);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;}<br />
+            &nbsp;&nbsp;}<br />
+            });<br />
+            layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });<br />
+            <br />
+            // 🎯 监测 LCP (最大内容绘制)<br />
+            const lcpObserver = new PerformanceObserver((list) => {<br />
+            &nbsp;&nbsp;const entries = list.getEntries();<br />
+            &nbsp;&nbsp;const lastEntry = entries[entries.length - 1];<br />
+            &nbsp;&nbsp;console.log(`🖼️ LCP: ${lastEntry.renderTime ||
+            lastEntry.loadTime}ms`);<br />
+            &nbsp;&nbsp;console.log(`LCP 元素:`, lastEntry.element);<br />
+            });<br />
+            lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+          </div>
+
+          <h3 style="margin-top: 2.5rem">3. 实时帧率监测</h3>
+          <p style="line-height: 1.8; margin-bottom: 1rem">
+            使用 requestAnimationFrame
+            可以精确测量页面的实时帧率，这对于调试动画性能非常重要。
+          </p>
+
+          <div class="code-block">
+            // 高精度 FPS 监测器<br />
+            class FPSMonitor {<br />
+            &nbsp;&nbsp;constructor() {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.frames = [];<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.lastTime = performance.now();<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.fps = 60;<br />
+            &nbsp;&nbsp;}<br />
+            <br />
+            &nbsp;&nbsp;measure() {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;const now = performance.now();<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;const delta = now - this.lastTime;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.lastTime = now;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;// 收集最近 60 帧的数据<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.frames.push(delta);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;if (this.frames.length > 60) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.frames.shift();<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;}<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;// 计算平均帧率<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;const avg = this.frames.reduce((a, b) => a +
+            b) / this.frames.length;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;this.fps = Math.round(1000 / avg);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;requestAnimationFrame(() =>
+            this.measure());<br />
+            &nbsp;&nbsp;}<br />
+            &nbsp;&nbsp;<br />
+            &nbsp;&nbsp;getFPS() {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;return this.fps;<br />
+            &nbsp;&nbsp;}<br />
+            }<br />
+            <br />
+            const monitor = new FPSMonitor();<br />
+            monitor.measure();
+          </div>
+
+          <div class="highlight-box success" style="margin-top: 1.5rem">
+            <strong>✅ Chrome DevTools 性能分析工具：</strong>
+            <ul style="margin-top: 0.5rem; line-height: 2">
+              <li>
+                <strong>Performance 面板</strong
+                >：录制性能，查看火焰图，分析主线程活动
+              </li>
+              <li>
+                <strong>Rendering 面板</strong>：Paint
+                Flashing（重绘高亮）、Layer Borders（图层边界）
+              </li>
+              <li>
+                <strong>Layers 面板</strong>：3D
+                图层视图，查看每个图层的内存占用
+              </li>
+              <li>
+                <strong>Coverage 面板</strong>：查找未使用的 CSS 和 JS 代码
+              </li>
+              <li><strong>Lighthouse</strong>：自动化性能审计，生成优化建议</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 第六部分：优化建议 -->
+        <section class="section">
+          <h2>🎯 第六阶段：渲染优化最佳实践</h2>
+
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h4>1️⃣ 减少 Reflow</h4>
+              <p style="line-height: 1.8; margin-bottom: 1rem">
+                Reflow（回流/重排）是浏览器重新计算元素几何属性的过程，开销极大。关键在于使用
+                GPU 加速的属性替代几何属性。
+              </p>
+
+              <div class="highlight-box" style="margin-bottom: 1rem">
+                <strong>💥 为什么这样糟糕：</strong><br />
+                每次修改 <code>width</code>、<code>height</code>、<code
+                  >margin</code
+                >
+                等几何属性时，浏览器都需要：<br />
+                1️⃣ 重新计算受影响元素的布局（Layout）<br />
+                2️⃣ 遍历渲染树，影响可能波及整个页面<br />
+                3️⃣ 重新绘制（Paint）<br />
+                4️⃣ 重新合成（Composite）
+              </div>
+
+              <div class="code-block" style="margin-top: 1rem">
+                // ❌ 糟糕：每次循环都触发 reflow<br />
+                for (let i = 0; i < 100; i++) {<br />
+                &nbsp;&nbsp;el.style.width = i + 'px'; // 触发完整渲染流程！<br />
+                }<br />
+                <br />
+                // ✅ 优化：使用 transform<br />
+                el.style.transform = `scaleX(${scale})`;<br />
+                // 只触发 Composite，在 GPU 上执行
+              </div>
+
+              <div class="highlight-box success" style="margin-top: 1rem">
+                <strong>🚀 新特性：content-visibility</strong><br />
+                使用
+                <code>content-visibility: auto</code>
+                可以让浏览器跳过屏幕外元素的渲染工作（包括 Layout 和
+                Paint），直到它们进入视口。这对于长列表性能提升巨大！
+              </div>
+            </div>
+
+            <div class="comparison-card">
+              <h4>2️⃣ 批量 DOM 操作</h4>
+              <p style="line-height: 1.8; margin-bottom: 1rem">
+                DocumentFragment 是一个轻量级的文档对象，它不是真实 DOM
+                树的一部分。在其上进行操作不会触发页面重排。
+              </p>
+
+              <div class="code-block" style="margin-top: 1rem">
+                // ❌ 糟糕：多次插入触发多次 reflow<br />
+                for (let i = 0; i < 100; i++) {<br />
+                &nbsp;&nbsp;container.appendChild(createEl());<br />
+                &nbsp;&nbsp;// 每次 appendChild 都会：<br />
+                &nbsp;&nbsp;// 1. 触发一次 Reflow<br />
+                &nbsp;&nbsp;// 2. 重新计算 container 的尺寸<br />
+                &nbsp;&nbsp;// 3. 触发一次 Repaint<br />
+                }<br />
+                // 总共：100 次 Reflow + 100 次 Repaint = 💥<br />
+                <br />
+                // ✅ 优化：使用 DocumentFragment<br />
+                const frag = document.createDocumentFragment();<br />
+                for (let i = 0; i < 100; i++) {<br />
+                &nbsp;&nbsp;frag.appendChild(createEl());<br />
+                &nbsp;&nbsp;// 在内存中操作，不触发渲染<br />
+                }<br />
+                container.appendChild(frag); // 只触发 1 次！<br />
+                // 总共：1 次 Reflow + 1 次 Repaint = ✅
+              </div>
+
+              <div class="highlight-box info" style="margin-top: 1rem">
+                <strong>💡 视觉更新的最佳时机：</strong><br />
+                如果必须进行 DOM 操作，最好在
+                <code>requestAnimationFrame</code>
+                回调中进行。这能确保在浏览器下一次重绘之前执行，避免在一帧内多次强制重排。
+              </div>
+            </div>
+
+            <div class="comparison-card">
+              <h4>3️⃣ 使用 CSS 动画</h4>
+              <p style="line-height: 1.8; margin-bottom: 1rem">
+                CSS
+                动画由浏览器的<strong>合成器线程</strong>处理，与主线程分离，即使
+                JavaScript 繁忙也能保持流畅。
+              </p>
+
+              <div class="highlight-box" style="margin-bottom: 1rem">
+                <strong>⚠️ JavaScript 动画的问题：</strong><br />
+                • 运行在主线程上，受 JS 执行阻塞<br />
+                • <code>setInterval/setTimeout</code> 精度不够，可能丢帧<br />
+                • 即使用 <code>requestAnimationFrame</code>，修改
+                <code>left/top</code> 仍会触发 Layout<br />
+                • 无法利用浏览器的优化（如标签页不可见时暂停）
+              </div>
+
+              <div class="code-block" style="margin-top: 1rem">
+                /* ❌ 避免用 JS 改变位置 */<br />
+                setInterval(() => {<br />
+                &nbsp;&nbsp;el.style.left = x + 'px'; // 触发 Reflow！<br />
+                }, 16); // 16.67ms ≈ 60fps，但无法保证<br />
+                <br />
+                /* ✅ 使用 CSS transform + transition */<br />
+                .animated {<br />
+                &nbsp;&nbsp;transition: transform 0.3s ease-out;<br />
+                &nbsp;&nbsp;transform: translateX(100px);<br />
+                &nbsp;&nbsp;/* 浏览器自动优化为 60fps */<br />
+                &nbsp;&nbsp;/* 在合成线程执行，不阻塞主线程 */<br />
+                }<br />
+                <br />
+                /* 🚀 更复杂的动画用 @keyframes */<br />
+                @keyframes slide {<br />
+                &nbsp;&nbsp;from { transform: translateX(0); }<br />
+                &nbsp;&nbsp;to { transform: translateX(100px); }<br />
+                }
+              </div>
+
+              <div class="highlight-box success" style="margin-top: 1rem">
+                <strong>✅ 合成器独有属性 (Compositor-Only)：</strong><br />
+                坚持使用 <code>transform</code> 和
+                <code>opacity</code>。只有这两个属性保证在任何情况下都不会触发
+                Layout 或 Paint，始终由合成线程处理。
+              </div>
+            </div>
+
+            <div class="comparison-card">
+              <h4>4️⃣ 避免强制同步布局</h4>
+              <p style="margin-bottom: 1rem; line-height: 1.8">
+                这是一个非常经典的浏览器渲染性能优化问题。核心原因在于浏览器的<strong
+                  >渲染队列机制（Render Queue）</strong
+                >和<strong>懒计算（Lazy Evaluation）</strong>策略。
+              </p>
+
+              <div class="highlight-box info" style="margin-bottom: 1rem">
+                <strong>🧠 浏览器的"懒"策略：</strong><br />
+                浏览器很"懒"，它总是想把所有的样式修改积攒起来，一次性统一计算。但是，如果你在修改了样式之后立即去"读取"布局信息，浏览器就被迫暂停积攒，必须立即、马上计算出最新的布局结果给你，这就破坏了浏览器的优化机制。
+              </div>
+
+              <h4
+                style="
+                  font-size: 1.1rem;
+                  color: #fc8181;
+                  margin: 1.5rem 0 0.5rem 0;
+                "
+              >
+                ❌ 情况一：强制同步布局 (Write → Read → Write)
+              </h4>
+              <div class="code-block" style="margin-top: 1rem">
+                // 1. Write (写)<br />
+                el.style.width = '100px';<br />
+                // 浏览器动作：把这个修改放入渲染队列<br />
+                // 标记布局为"脏（Dirty）"<br />
+                // 此时，浏览器还没真正计算 el 的新宽度<br />
+                <br />
+                // 2. Read (读)<br />
+                const h = el.offsetHeight;<br />
+                // ⚠️ 浏览器发现布局是"脏"的<br />
+                // 被迫立刻进行一次 Layout（重排）<br />
+                // ===> 这就是"强制同步布局" <===<br />
+                <br />
+                // 3. Write (写)<br />
+                el.style.height = h + 'px';<br />
+                // 布局再次变"脏"
+              </div>
+
+              <div class="highlight-box" style="margin: 1rem 0">
+                <strong>💥 结果：</strong
+                >在这一段代码里，浏览器被迫在中间进行了一次额外的、昂贵的布局计算。如果这发生在一个循环里，性能会<strong>灾难性下降</strong>（Layout
+                Thrashing）。
+              </div>
+
+              <h4
+                style="
+                  font-size: 1.1rem;
+                  color: #48bb78;
+                  margin: 1.5rem 0 0.5rem 0;
+                "
+              >
+                ✅ 情况二：先读后写 (Read → Write → Write)
+              </h4>
+              <div class="code-block" style="margin-top: 1rem">
+                // 1. Read (读)<br />
+                const h = el.offsetHeight;<br />
+                // 浏览器动作：检查布局状态<br />
+                // 如果布局是"干净"的，直接返回缓存高度<br />
+                // 速度极快！<br />
+                <br />
+                // 2. Write (写)<br />
+                el.style.width = '100px';<br />
+                // 浏览器动作：放入渲染队列，标记为"脏"<br />
+                <br />
+                // 3. Write (写)<br />
+                el.style.height = h + 'px';<br />
+                // 继续放入队列<br />
+                <br />
+                // ...脚本结束...<br />
+                // 浏览器统一处理队列，只进行一次 Layout
+              </div>
+
+              <div class="highlight-box success" style="margin-top: 1rem">
+                <strong>🚀 结果：</strong
+                >利用浏览器缓存机制，所有写入操作都在最后，浏览器可以在下一帧渲染前一次性把所有样式都计算好。
+              </div>
+
+              <h4
+                style="
+                  font-size: 1.1rem;
+                  color: #667eea;
+                  margin: 1.5rem 0 0.5rem 0;
+                "
+              >
+                📝 形象的比喻
+              </h4>
+              <p style="line-height: 1.8; margin-bottom: 0.5rem">
+                把浏览器想象成一个会计：
+              </p>
+              <ul style="line-height: 2; margin-left: 1.5rem">
+                <li>
+                  <strong style="color: #fc8181"
+                    >❌ 坏老板（强制同步布局）：</strong
+                  ><br />
+                  老板：把这个账目的收入改成 100 块。（写）<br />
+                  老板：现在总利润是多少？（读）<br />
+                  会计：（崩溃）但我还没算进去刚才那 100
+                  块呢！不得不停下手头所有工作，立刻拿出计算器重新算一遍报表给你看。
+                </li>
+                <li style="margin-top: 0.8rem">
+                  <strong style="color: #48bb78">✅ 好老板（批量处理）：</strong
+                  ><br />
+                  老板：上个月的利润表给我看一眼。（读 ——
+                  直接拿桌上现成的报表）<br />
+                  老板：把这个账目收入改 100 块。（写）<br />
+                  老板：把支出改成刚才那个利润的一半。（写）<br />
+                  会计：好的，等您都吩咐完了，我今晚统一算一遍新的报表。（批量优化）
+                </li>
+              </ul>
+            </div>
+
+            <div class="comparison-card">
+              <h4>5️⃣ 使用 will-change</h4>
+              <p style="line-height: 1.8; margin-bottom: 1rem">
+                <code>will-change</code>
+                是一个提示浏览器提前优化的属性，它告诉浏览器某个元素即将发生变化，浏览器可以提前做准备。
+              </p>
+
+              <div class="highlight-box info" style="margin-bottom: 1rem">
+                <strong>🧠 浏览器如何响应 will-change：</strong><br />
+                1️⃣ 为该元素创建独立的<strong>合成图层</strong><br />
+                2️⃣ 提前分配 GPU 内存和资源<br />
+                3️⃣ 避免在动画时临时创建图层（导致闪烁）<br />
+                4️⃣ 优化动画的渲染路径
+              </div>
+
+              <div class="code-block" style="margin-top: 1rem">
+                /* ✅ 正确使用 */<br />
+                .will-animate {<br />
+                &nbsp;&nbsp;will-change: transform, opacity;<br />
+                &nbsp;&nbsp;/* 只在即将动画的元素上使用 */<br />
+                }<br />
+                <br />
+                /* 🎯 动态添加和移除 */<br />
+                el.addEventListener('mouseenter', () => {<br />
+                &nbsp;&nbsp;el.style.willChange = 'transform';<br />
+                });<br />
+                el.addEventListener('animationend', () => {<br />
+                &nbsp;&nbsp;el.style.willChange = 'auto'; // 动画后移除！<br />
+                });
+              </div>
+
+              <div class="highlight-box" style="margin-top: 1rem">
+                <strong>⚠️ 注意：不要滥用 will-change</strong><br />
+                • 每个图层消耗额外内存（几 MB ~ 几十 MB）<br />
+                • 过多图层导致<strong>内存溢出</strong>，反而卡顿<br />
+                • <strong>不要</strong>在全局或
+                <code>*</code> 选择器上使用<br />
+                • <strong>不要</strong>在不会动画的元素上使用<br />
+                • 动画结束后应<strong>移除</strong> will-change
+              </div>
+
+              <div class="code-block" style="margin-top: 1rem">
+                /* ❌ 绝对不要这样做 */<br />
+                * {<br />
+                &nbsp;&nbsp;will-change: transform; /* 灾难！*/<br />
+                }
+              </div>
+            </div>
+
+            <div class="comparison-card">
+              <h4>6️⃣ 延迟非关键渲染</h4>
+              <p style="line-height: 1.8; margin-bottom: 1rem">
+                <code>requestIdleCallback</code>
+                让浏览器在空闲时执行低优先级任务，避免阻塞关键渲染和用户交互。
+              </p>
+
+              <div class="highlight-box info" style="margin-bottom: 1rem">
+                <strong>⏱️ 浏览器的帧预算（Frame Budget）：</strong><br />
+                • 60fps = 每帧 16.67ms<br />
+                • 浏览器需要完成：Layout + Paint + Composite + JS执行<br />
+                • 如果一帧内完不成所有任务 → <strong>掉帧、卡顿</strong><br />
+                •
+                <code>requestIdleCallback</code>
+                在每帧<strong>剩余时间</strong>执行
+              </div>
+
+              <div class="code-block" style="margin-top: 1rem">
+                // ✅ 延迟非关键渲染<br />
+                requestIdleCallback((deadline) => {<br />
+                &nbsp;&nbsp;// deadline.timeRemaining() 返回剩余时间<br />
+                &nbsp;&nbsp;while (deadline.timeRemaining() > 0 && tasks.length)
+                {<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;const task = tasks.shift();<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;task(); // 执行低优先级任务<br />
+                &nbsp;&nbsp;}<br />
+                &nbsp;&nbsp;<br />
+                &nbsp;&nbsp;// 如果还有任务，放到下一个空闲期<br />
+                &nbsp;&nbsp;if (tasks.length) {<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;requestIdleCallback(arguments.callee);<br />
+                &nbsp;&nbsp;}<br />
+                }, { timeout: 2000 }); // 最多等待 2 秒<br />
+                <br />
+                // 🎯 适用场景：<br />
+                // • 分析和上报统计数据<br />
+                // • 预加载下一页内容<br />
+                // • 图片懒加载的预处理<br />
+                // • 非可视区域的渲染
+              </div>
+
+              <div class="highlight-box success" style="margin-top: 1rem">
+                <strong>🎯 最佳实践：优先级分层</strong><br />
+                1️⃣ <strong>关键路径</strong>：首屏渲染、用户交互 → 立即执行<br />
+                2️⃣ <strong>重要但不紧急</strong>：数据预加载 →
+                <code>setTimeout</code><br />
+                3️⃣ <strong>可延迟</strong>：分析、日志 →
+                <code>requestIdleCallback</code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 总结 -->
+        <section class="section">
+          <h2>📝 核心要点总结</h2>
+
+          <div class="highlight-box success">
+            <h3 style="margin-top: 0">🎯 关键渲染路径完整流程</h3>
+            <ol style="line-height: 2; margin-left: 1.5rem">
+              <li><strong>字节流</strong> → 通过网络接收 HTML 字节</li>
+              <li><strong>字符</strong> → 根据编码转换为字符</li>
+              <li><strong>令牌</strong> → 词法分析生成 HTML 令牌</li>
+              <li><strong>DOM</strong> → 构建文档对象模型树</li>
+              <li><strong>CSSOM</strong> → 并行构建 CSS 对象模型树</li>
+              <li><strong>Render Tree</strong> → 合并 DOM 和 CSSOM</li>
+              <li><strong>Layout</strong> → 计算每个节点的几何信息</li>
+              <li><strong>Paint</strong> → 将渲染树转换为像素</li>
+              <li><strong>Composite</strong> → 合成图层并显示到屏幕</li>
+            </ol>
+          </div>
+
+          <div class="highlight-box" style="margin-top: 2rem">
+            <h3 style="margin-top: 0">⚡ 性能优化黄金法则</h3>
+            <ul style="line-height: 2; margin-left: 1.5rem">
+              <li>
+                <strong>优先使用 Composite</strong>：transform 和 opacity
+                是最快的
+              </li>
+              <li><strong>避免 Reflow</strong>：尽量不改变几何属性</li>
+              <li><strong>批量操作</strong>：减少 DOM 操作次数</li>
+              <li><strong>异步加载</strong>：使用 defer/async 加载脚本</li>
+              <li><strong>CSS 在前，JS 在后</strong>：避免阻塞渲染</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // FPS 监测
+      let lastTime = performance.now();
+      let frames = 0;
+      let fps = 60;
+
+      function updateFPS() {
+        frames++;
+        const now = performance.now();
+
+        if (now >= lastTime + 1000) {
+          fps = Math.round((frames * 1000) / (now - lastTime));
+          document.getElementById("fpsValue").textContent = fps;
+
+          // 根据 FPS 改变颜色
+          const fpsEl = document.getElementById("fpsValue");
+          if (fps >= 55) {
+            fpsEl.style.color = "#48bb78"; // 绿色
+          } else if (fps >= 30) {
+            fpsEl.style.color = "#ecc94b"; // 黄色
+          } else {
+            fpsEl.style.color = "#fc8181"; // 红色
+          }
+
+          frames = 0;
+          lastTime = now;
+        }
+
+        requestAnimationFrame(updateFPS);
+      }
+      updateFPS();
+
+      // 性能日志
+      function addLog(message, type = "info") {
+        const monitor = document.getElementById("performanceMonitor");
+        const time = new Date().toLocaleTimeString();
+        const logClass = type ? `log-type-${type}` : "";
+
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${logClass}">${message}</span>`;
+
+        monitor.appendChild(entry);
+        monitor.scrollTop = monitor.scrollHeight;
+      }
+
+      // 步骤详情
+      const stepDetails = {
+        dom: {
+          title: "DOM (Document Object Model)",
+          content: `
+                    <p>DOM 是 HTML 文档的程序接口，将 HTML 解析为树状结构。每个节点都是一个对象，包含了属性和方法。</p>
+                    <div class="code-block">
+&lt;html&gt;<br>
+&nbsp;&nbsp;&lt;body&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;div id="app"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;标题&lt;/h1&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+&nbsp;&nbsp;&lt;/body&gt;<br>
+&lt;/html&gt;
+                    </div>
+                    <p><strong>关键点：</strong>DOM 构建是增量的，边解析边构建。浏览器不需要等待整个 HTML 文档下载完成就可以开始构建 DOM 树。</p>
+                `,
+        },
+        cssom: {
+          title: "CSSOM (CSS Object Model)",
+          content: `
+                    <p>CSSOM 是 CSS 的对象模型。浏览器将 CSS 解析为树状结构，并计算每个节点的最终样式（Computed Style）。</p>
+                    <div class="highlight-box">
+                        <strong>⚠️ 阻塞渲染：</strong>CSS 是渲染阻塞资源！浏览器必须等待 CSSOM 构建完成才能进行下一步（Render Tree）。这是因为 CSS 具有"层叠"（Cascading）特性，后加载的样式可能覆盖前面的样式，如果提前渲染会导致页面闪烁。
+                    </div>
+                    <p><strong>优化建议：</strong></p>
+                    <ul>
+                        <li>内联关键 CSS (Critical CSS)</li>
+                        <li>使用 media 属性异步加载非关键 CSS</li>
+                        <li>避免使用 @import (会串行加载)</li>
+                    </ul>
+                `,
+        },
+        render: {
+          title: "Render Tree (渲染树)",
+          content: `
+                    <p>渲染树是 DOM 和 CSSOM 的结合，只包含<strong>需要显示</strong>的节点。它是可视元素的蓝图。</p>
+                    <div class="highlight-box info">
+                        <strong>注意区别：</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li><strong>DOM 树：</strong>包含所有 HTML 标签（包括 head, script, meta）。</li>
+                            <li><strong>渲染树：</strong>去除不可见元素（display: none），但包含伪元素（::before, ::after）。</li>
+                        </ul>
+                    </div>
+                    <p><strong>visibility: hidden vs display: none：</strong></p>
+                    <ul>
+                        <li><code>visibility: hidden</code>：元素在渲染树中，占据空间，只是不可见。</li>
+                        <li><code>display: none</code>：元素<strong>不在</strong>渲染树中，不占据空间。</li>
+                    </ul>
+                `,
+        },
+        layout: {
+          title: "Layout (布局/回流)",
+          content: `
+                    <p>Layout 阶段（也称 Reflow）计算渲染树中每个节点在屏幕上的确切坐标和大小。浏览器从根节点开始遍历，根据盒模型计算几何信息。</p>
+                    <div class="code-block">
+// 浏览器计算：<br>
+- 盒模型：width, height, padding, border, margin<br>
+- 坐标系统：相对于视口 (Viewport) 的 x, y 坐标<br>
+- 浮动和清除：float, clear<br>
+- 文本换行和溢出处理
+                    </div>
+                    <div class="highlight-box">
+                        <strong>💥 性能杀手：</strong>Layout 是主线程上最昂贵的操作之一。读取 offsetHeight 等属性会强制浏览器立即执行 Layout（强制同步布局）。
+                    </div>
+                `,
+        },
+        paint: {
+          title: "Paint (绘制)",
+          content: `
+                    <p>Paint 阶段将布局后的渲染树转换为屏幕上的实际像素。这个过程类似于在画布上画画，也称为"栅格化"（Rasterization）。</p>
+                    <p><strong>绘制顺序（Stacking Context）：</strong></p>
+                    <ol style="line-height: 2;">
+                        <li>背景颜色和背景图片</li>
+                        <li>边框 (Border)</li>
+                        <li>子元素 (Children)</li>
+                        <li>轮廓 (Outline)</li>
+                    </ol>
+                    <div class="highlight-box info">
+                        <strong>绘制列表（Draw Calls）：</strong>浏览器会生成一系列绘制指令（如"画一个红色矩形"），而不是直接操作像素。
+                    </div>
+                `,
+        },
+        composite: {
+          title: "Composite (合成)",
+          content: `
+                    <p>Composite 是最后一步。现代浏览器将页面拆分为多个图层（Layers），分别栅格化，然后由<strong>合成线程</strong>（Compositor Thread）在 GPU 上将它们合成在一起。</p>
+                    <div class="code-block">
+/* 触发独立图层： */<br>
+- transform: translateZ(0)<br>
+- will-change: transform<br>
+- video, canvas, iframe<br>
+- position: fixed
+                    </div>
+                    <div class="highlight-box success">
+                        <strong>🚀 性能核心：</strong>合成操作在 GPU 上进行，不占用主线程。滚动和 transform 动画如果只触发合成，就能保证极高的流畅度（60fps+），即使主线程被 JS 阻塞。
+                    </div>
+                    <p><strong>分块（Tiling）：</strong>为了节省内存，大的图层会被切分成小块（Tiles）进行栅格化。</p>
+                `,
+        },
+      };
+
+      function showStepDetail(step) {
+        const detail = stepDetails[step];
+        const detailEl = document.getElementById("stepDetail");
+        const titleEl = document.getElementById("stepTitle");
+        const contentEl = document.getElementById("stepContent");
+
+        titleEl.textContent = detail.title;
+        contentEl.innerHTML = detail.content;
+        detailEl.style.display = "block";
+        detailEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        addLog(`查看详情: ${detail.title}`, "info");
+      }
+
+      // 演示函数
+      const demoBox = document.getElementById("demoBox");
+
+      function triggerReflow() {
+        const start = performance.now();
+
+        // 触发 Reflow：改变尺寸
+        const currentWidth = demoBox.offsetWidth;
+        demoBox.style.width = currentWidth + 50 + "px";
+
+        // 强制同步 Layout
+        const newWidth = demoBox.offsetWidth;
+
+        const duration = (performance.now() - start).toFixed(2);
+
+        addLog(
+          `⚠️ Reflow: 改变 width 从 ${currentWidth}px 到 ${newWidth}px | 耗时: ${duration}ms`,
+          "reflow"
+        );
+        console.log(
+          `%c[Reflow] 触发布局重排 - 耗时: ${duration}ms`,
+          "color: #fc8181; font-weight: bold"
+        );
+
+        // 恢复
+        setTimeout(() => {
+          demoBox.style.width = "200px";
+        }, 1000);
+      }
+
+      function triggerRepaint() {
+        const start = performance.now();
+
+        // 触发 Repaint：改变颜色
+        const colors = [
+          "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+          "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+          "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        ];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        demoBox.style.background = randomColor;
+
+        const duration = (performance.now() - start).toFixed(2);
+
+        addLog(`🎨 Repaint: 改变背景颜色 | 耗时: ${duration}ms`, "repaint");
+        console.log(
+          `%c[Repaint] 触发重绘 - 耗时: ${duration}ms`,
+          "color: #4299e1; font-weight: bold"
+        );
+      }
+
+      function triggerComposite() {
+        const start = performance.now();
+
+        // 触发 Composite：使用 transform
+        demoBox.style.transform = "translateX(100px) rotate(10deg) scale(1.1)";
+
+        const duration = (performance.now() - start).toFixed(2);
+
+        addLog(
+          `✅ Composite: transform 变换 | 耗时: ${duration}ms (最优性能!)`,
+          "composite"
+        );
+        console.log(
+          `%c[Composite] 仅合成 - 耗时: ${duration}ms`,
+          "color: #48bb78; font-weight: bold"
+        );
+
+        // 恢复
+        setTimeout(() => {
+          demoBox.style.transform = "none";
+        }, 1000);
+      }
+
+      function clearLogs() {
+        const monitor = document.getElementById("performanceMonitor");
+        monitor.innerHTML =
+          '<div class="log-entry"><span class="log-time">[系统]</span> 日志已清空</div>';
+      }
+
+      // 页面加载性能监测
+      window.addEventListener("load", () => {
+        const perfData = performance.timing;
+        const domParse = perfData.domInteractive - perfData.domLoading;
+        const pageLoad = perfData.loadEventEnd - perfData.navigationStart;
+
+        console.group("📊 页面性能指标");
+        console.log(`DOM 解析耗时: ${domParse}ms`);
+        console.log(`页面加载耗时: ${pageLoad}ms`);
+        console.log(
+          `DOMContentLoaded: ${
+            perfData.domContentLoadedEventEnd - perfData.navigationStart
+          }ms`
+        );
+        console.groupEnd();
+
+        addLog(`页面加载完成 | DOM解析: ${domParse}ms | 总耗时: ${pageLoad}ms`);
+      });
+
+      // 监测长任务
+      if ("PerformanceObserver" in window) {
+        try {
+          const observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              console.warn(`⚠️ 长任务检测: ${entry.duration.toFixed(2)}ms`);
+              addLog(
+                `⚠️ 长任务: ${entry.duration.toFixed(2)}ms (>50ms 会导致卡顿)`,
+                "reflow"
+              );
+            }
+          });
+          observer.observe({ entryTypes: ["longtask"] });
+        } catch (e) {
+          console.log("此浏览器不支持长任务监测");
+        }
+      }
+
+      console.log(
+        "%c🚀 浏览器渲染机制演示页面",
+        "font-size: 24px; color: #667eea; font-weight: bold;"
+      );
+      console.log(
+        "%c打开 Chrome DevTools：",
+        "font-size: 16px; color: #764ba2;"
+      );
+      console.log("1. Performance 面板 → 录制性能");
+      console.log("2. Rendering 面板 → 启用 Paint Flashing");
+      console.log("3. Layers 面板 → 查看合成图层");
+      console.log("4. 点击页面按钮观察不同操作的性能差异");
+    </script>
+  </body>
+</html>

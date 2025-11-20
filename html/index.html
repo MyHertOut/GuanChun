@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<!-- 
+    模块 1: 哲学与历史
+    DOCTYPE 声明告诉浏览器使用标准模式（Standard Mode）而非怪异模式（Quirks Mode）
+    这是 HTML5 的简化 doctype，不再基于 SGML
+-->
+<html lang="zh-CN">
+<!-- 
+    lang 属性对无障碍性和 SEO 都至关重要
+    屏幕阅读器会根据语言选择正确的发音
+-->
+<head>
+    <meta charset="UTF-8">
+    <!-- 
+        字符编码声明，必须在前 1024 字节内
+        UTF-8 是推荐的编码方式，支持全球所有语言
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 
+        响应式设计的基础
+        告诉移动浏览器不要缩放页面，使用设备宽度
+    -->
+    
+    <!-- 模块 6: 性能与 SEO - 元数据 -->
+    <meta name="description" content="HTML 深度学习实践页面 - 展示语义化、无障碍性、表单、多媒体等核心概念">
+    <meta name="keywords" content="HTML5, 语义化, 无障碍性, Web Components">
+    
+    <!-- Open Graph 标签 - 社交媒体分享优化 -->
+    <meta property="og:title" content="HTML 深度学习实践">
+    <meta property="og:description" content="一个展示 HTML5 核心概念的综合示例页面">
+    <meta property="og:type" content="website">
+    
+    <!-- 模块 6: 资源提示 (Resource Hints) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- 
+        preconnect: 提前进行 DNS 查找、TCP 握手和 TLS 协商
+        减少后续资源加载的延迟
+    -->
+    
+    <title>HTML 深度学习实践 | 从基础到进阶</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        nav {
+            background: #2d3748;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        nav a:hover {
+            background: #4a5568;
+        }
+        
+        main {
+            padding: 2rem;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        h3 {
+            color: #764ba2;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .code-explanation {
+            background: #1a202c;
+            color: #68d391;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .semantic-example {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        form {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        input, textarea, select {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        input:valid {
+            border-color: #48bb78;
+        }
+        
+        input:invalid {
+            border-color: #f56565;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        video, audio {
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        canvas {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: block;
+            margin: 1rem 0;
+        }
+        
+        footer {
+            background: #2d3748;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .highlight {
+            background: #fef5e7;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        aside {
+            background: #ebf4ff;
+            padding: 1.5rem;
+            border-left: 4px solid #4299e1;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 
+            模块 3: 语义化与无障碍性
+            使用语义化标签而不是 <div>，帮助：
+            1. 搜索引擎理解页面结构（SEO）
+            2. 屏幕阅读器更好地导航（A11y）
+            3. 代码可读性和可维护性
+        -->
+        <header>
+            <h1>HTML 深度学习实践</h1>
+            <p>从"会用"到"精通" - 理解每个标签背后的原理</p>
+        </header>
+        
+        <!-- 
+            <nav> 语义化标签表示导航区域
+            屏幕阅读器可以直接跳转到导航
+        -->
+        <nav aria-label="主导航">
+            <!-- aria-label 提供无障碍描述 -->
+            <ul>
+                <li><a href="#semantics">语义化</a></li>
+                <li><a href="#forms">表单验证</a></li>
+                <li><a href="#multimedia">多媒体</a></li>
+                <li><a href="#canvas">Canvas</a></li>
+                <li><a href="#performance">性能优化</a></li>
+            </ul>
+        </nav>
+        
+        <main>
+            <!-- 
+                模块 3: 语义化标签示例
+                <article> 表示独立的内容块
+            -->
+            <article id="semantics">
+                <section>
+                    <h2>📚 模块 3: 语义化与无障碍性</h2>
+                    
+                    <p>使用语义化标签而不是 <code>&lt;div&gt;</code> 的好处：</p>
+                    
+                    <div class="semantic-example">
+                        <div class="card">
+                            <h3>🔍 SEO 优化</h3>
+                            <p>搜索引擎能更好地理解内容结构，提高排名。</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>♿ 无障碍性</h3>
+                            <p>屏幕阅读器可以识别语义，帮助视障用户导航。</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>📖 可读性</h3>
+                            <p>代码更清晰，维护更容易。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 
+                        <aside> 表示与主内容间接相关的内容
+                        通常用于侧边栏、引用、注释等
+                    -->
+                    <aside>
+                        <strong>💡 最佳实践：</strong> 
+                        <em>No ARIA is better than bad ARIA</em> - 
+                        尽量使用原生 HTML 标签，而不是用 <code>&lt;div&gt;</code> + ARIA 属性。
+                    </aside>
+                    
+                    <div class="code-explanation">
+                        // 无障碍树示例<br>
+                        // 浏览器会自动将语义 HTML 转换为无障碍树<br>
+                        &lt;nav&gt; → role="navigation"<br>
+                        &lt;button&gt; → role="button" + 键盘支持<br>
+                        &lt;article&gt; → role="article"
+                    </div>
+                </section>
+            </article>
+            
+            <!-- 模块 4: 表单与交互 -->
+            <article id="forms">
+                <section>
+                    <h2>📋 模块 4: 表单与原生验证</h2>
+                    
+                    <p>HTML5 提供了强大的<span class="highlight">约束验证 API</span>，减少对 JavaScript 的依赖。</p>
+                    
+                    <form id="demo-form" novalidate>
+                        <!-- novalidate 禁用浏览器默认提示，我们用自定义验证 -->
+                        
+                        <div class="form-group">
+                            <label for="username">
+                                用户名 <span style="color: red;">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                required 
+                                minlength="3"
+                                maxlength="20"
+                                pattern="[a-zA-Z0-9_]+"
+                                placeholder="字母、数字或下划线，3-20个字符"
+                                aria-describedby="username-help"
+                            >
+                            <!-- 
+                                pattern: 正则验证
+                                required: 必填
+                                aria-describedby: 关联帮助文本，提升无障碍性
+                            -->
+                            <small id="username-help">只能包含字母、数字和下划线</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">邮箱 <span style="color: red;">*</span></label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                required
+                                placeholder="your@email.com"
+                            >
+                            <!-- 
+                                type="email" 的好处：
+                                1. 自动验证邮箱格式
+                                2. 移动端弹出邮箱键盘（包含 @ 符号）
+                                3. 无需额外 JS 验证
+                            -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">手机号</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone"
+                                pattern="[0-9]{11}"
+                                placeholder="11位手机号"
+                                inputmode="numeric"
+                            >
+                            <!-- 
+                                type="tel": 移动端弹出数字键盘
+                                inputmode="numeric": 强制数字输入法
+                            -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age">年龄</label>
+                            <input 
+                                type="number" 
+                                id="age" 
+                                name="age"
+                                min="1"
+                                max="150"
+                                placeholder="1-150"
+                            >
+                            <!-- min/max: 数字范围约束 -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="website">个人网站</label>
+                            <input 
+                                type="url" 
+                                id="website" 
+                                name="website"
+                                placeholder="https://example.com"
+                            >
+                            <!-- type="url": 自动验证 URL 格式 -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">留言</label>
+                            <textarea 
+                                id="message" 
+                                name="message"
+                                rows="4"
+                                maxlength="500"
+                            ></textarea>
+                        </div>
+                        
+                        <button type="submit">提交表单</button>
+                    </form>
+                    
+                    <div class="code-explanation" style="margin-top: 1.5rem;">
+                        // CSS 伪类自动响应验证状态<br>
+                        input:valid { border-color: green; }<br>
+                        input:invalid { border-color: red; }<br>
+                        input:required { /* 必填字段样式 */ }<br><br>
+                        
+                        // JavaScript 约束验证 API<br>
+                        element.checkValidity() // 检查是否有效<br>
+                        element.setCustomValidity('错误信息') // 自定义错误
+                    </div>
+                </section>
+            </article>
+            
+            <!-- 模块 5: 多媒体 -->
+            <article id="multimedia">
+                <section>
+                    <h2>🎬 模块 5: 多媒体与图形</h2>
+                    
+                    <h3>视频 - 原生播放控件</h3>
+                    <div class="media-grid">
+                        <div>
+                            <video 
+                                controls 
+                                preload="metadata"
+                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23667eea' width='400' height='225'/%3E%3Ctext fill='white' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='24'%3E视频占位符%3C/text%3E%3C/svg%3E"
+                                width="100%"
+                            >
+                                <!-- 
+                                    controls: 显示播放控件
+                                    preload="metadata": 只预加载元数据（时长、尺寸）
+                                    poster: 封面图
+                                -->
+                                <source src="video.mp4" type="video/mp4">
+                                <source src="video.webm" type="video/webm">
+                                <!-- 多个 source 提供格式降级 -->
+                                
+                                <track 
+                                    kind="subtitles" 
+                                    src="subtitles-zh.vtt" 
+                                    srclang="zh" 
+                                    label="中文字幕"
+                                    default
+                                >
+                                <!-- <track> 提供字幕，对无障碍性至关重要 -->
+                                
+                                您的浏览器不支持视频标签。
+                            </video>
+                        </div>
+                        
+                        <div>
+                            <h4>为什么使用原生 &lt;video&gt;？</h4>
+                            <ul style="line-height: 2;">
+                                <li>✅ 无需插件（Flash 已淘汰）</li>
+                                <li>✅ 移动端友好</li>
+                                <li>✅ 内置无障碍支持</li>
+                                <li>✅ 可用 JS 控制（Media API）</li>
+                                <li>✅ 支持字幕和音轨切换</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 2rem;">音频</h3>
+                    <audio controls style="width: 100%; margin: 1rem 0;">
+                        <source src="audio.mp3" type="audio/mpeg">
+                        <source src="audio.ogg" type="audio/ogg">
+                        您的浏览器不支持音频标签。
+                    </audio>
+                </section>
+            </article>
+            
+            <!-- 模块 5: Canvas vs SVG -->
+            <article id="canvas">
+                <section>
+                    <h2>🎨 Canvas (位图) vs SVG (矢量)</h2>
+                    
+                    <div class="media-grid">
+                        <div>
+                            <h3>Canvas - 位图绘制</h3>
+                            <canvas id="myCanvas" width="400" height="200"></canvas>
+                            <!-- 
+                                Canvas 特点：
+                                - 基于像素的位图
+                                - 依赖 JavaScript 绘制
+                                - 适合游戏、图像处理、粒子效果
+                                - 缩放会模糊
+                            -->
+                            <div class="code-explanation">
+                                const ctx = canvas.getContext('2d');<br>
+                                ctx.fillStyle = '#667eea';<br>
+                                ctx.fillRect(0, 0, 400, 200);
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3>SVG - 矢量图形</h3>
+                            <svg width="400" height="200" style="border: 2px solid #e2e8f0; border-radius: 8px;">
+                                <!-- 
+                                    SVG 特点：
+                                    - 基于 XML 的矢量图
+                                    - 是 DOM 的一部分，可用 CSS 样式化
+                                    - 适合图标、图表、Logo
+                                    - 任意缩放不失真
+                                -->
+                                <defs>
+                                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <rect width="400" height="200" fill="url(#grad)" />
+                                <circle cx="200" cy="100" r="50" fill="white" opacity="0.3" />
+                                <text x="200" y="110" text-anchor="middle" fill="white" font-size="24" font-weight="bold">SVG</text>
+                            </svg>
+                        </div>
+                    </div>
+                </section>
+            </article>
+            
+            <!-- 模块 6: 性能优化 -->
+            <article id="performance">
+                <section>
+                    <h2>⚡ 模块 6: 性能优化技巧</h2>
+                    
+                    <h3>1. 脚本加载策略</h3>
+                    <div class="code-explanation">
+                        &lt;!-- ❌ 阻塞解析 --&gt;<br>
+                        &lt;script src="app.js"&gt;&lt;/script&gt;<br><br>
+                        
+                        &lt;!-- ✅ 推荐：并行下载，顺序执行 --&gt;<br>
+                        &lt;script src="app.js" defer&gt;&lt;/script&gt;<br><br>
+                        
+                        &lt;!-- ⚠️ 并行下载，立即执行（无顺序保证）--&gt;<br>
+                        &lt;script src="analytics.js" async&gt;&lt;/script&gt;
+                    </div>
+                    
+                    <h3>2. 图片优化</h3>
+                    <div class="code-explanation">
+                        &lt;!-- 响应式图片：根据屏幕宽度加载不同尺寸 --&gt;<br>
+                        &lt;img <br>
+                        &nbsp;&nbsp;srcset="small.jpg 400w, medium.jpg 800w, large.jpg 1200w"<br>
+                        &nbsp;&nbsp;sizes="(max-width: 600px) 400px, (max-width: 1000px) 800px, 1200px"<br>
+                        &nbsp;&nbsp;src="medium.jpg"<br>
+                        &nbsp;&nbsp;alt="响应式图片"<br>
+                        &nbsp;&nbsp;loading="lazy"<br>
+                        &gt;<br><br>
+                        
+                        &lt;!-- loading="lazy": 原生懒加载，只在接近视口时加载 --&gt;
+                    </div>
+                    
+                    <h3>3. 资源提示 (Resource Hints)</h3>
+                    <div class="code-explanation">
+                        &lt;!-- DNS 预解析 --&gt;<br>
+                        &lt;link rel="dns-prefetch" href="https://api.example.com"&gt;<br><br>
+                        
+                        &lt;!-- 预连接（DNS + TCP + TLS）--&gt;<br>
+                        &lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;<br><br>
+                        
+                        &lt;!-- 预加载关键资源 --&gt;<br>
+                        &lt;link rel="preload" href="font.woff2" as="font" crossorigin&gt;<br><br>
+                        
+                        &lt;!-- 预获取下个页面可能用到的资源 --&gt;<br>
+                        &lt;link rel="prefetch" href="next-page.html"&gt;
+                    </div>
+                    
+                    <h3>4. 关键渲染路径优化</h3>
+                    <aside>
+                        <strong>🚀 关键渲染路径：</strong><br>
+                        HTML → DOM → CSSOM → Render Tree → Layout → Paint → Composite<br><br>
+                        
+                        <strong>优化策略：</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>减少关键资源数量（内联关键 CSS）</li>
+                            <li>减少关键字节数（压缩、Tree Shaking）</li>
+                            <li>缩短关键路径长度（CDN、HTTP/2）</li>
+                        </ul>
+                    </aside>
+                </section>
+            </article>
+            
+            <!-- 模块 2: DOM 渲染 -->
+            <article>
+                <section>
+                    <h2>🏗️ 模块 2: 浏览器渲染机制</h2>
+                    
+                    <h3>解析流程</h3>
+                    <div class="code-explanation">
+                        1. 字节流 → 字符（根据 charset）<br>
+                        2. 字符 → 令牌（Tokenization）<br>
+                        &nbsp;&nbsp;&nbsp;例: "&lt;html&gt;" → StartTag Token<br>
+                        3. 令牌 → DOM 节点<br>
+                        4. DOM 节点 → DOM 树（Tree Construction）<br><br>
+                        
+                        💡 即使 HTML 有语法错误，浏览器也会尽力修复<br>
+                        例：缺少闭合标签会自动添加
+                    </div>
+                    
+                    <h3>Reflow vs Repaint</h3>
+                    <div class="semantic-example">
+                        <div class="card">
+                            <h4 style="color: #e53e3e;">Reflow (回流)</h4>
+                            <p><strong>触发条件：</strong>几何属性变化</p>
+                            <ul style="font-size: 0.9rem;">
+                                <li>改变尺寸、位置</li>
+                                <li>添加/删除 DOM</li>
+                                <li>字体大小变化</li>
+                            </ul>
+                            <p><strong>性能影响：</strong>⚠️ 昂贵</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 style="color: #38a169;">Repaint (重绘)</h4>
+                            <p><strong>触发条件：</strong>视觉属性变化</p>
+                            <ul style="font-size: 0.9rem;">
+                                <li>改变颜色</li>
+                                <li>改变背景</li>
+                                <li>改变阴影</li>
+                            </ul>
+                            <p><strong>性能影响：</strong>✅ 较轻</p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 style="color: #3182ce;">Composite (合成)</h4>
+                            <p><strong>触发条件：</strong>只改变图层合成</p>
+                            <ul style="font-size: 0.9rem;">
+                                <li>transform</li>
+                                <li>opacity</li>
+                                <li>filter</li>
+                            </ul>
+                            <p><strong>性能影响：</strong>🚀 最优</p>
+                        </div>
+                    </div>
+                </section>
+            </article>
+        </main>
+        
+        <!-- 
+            <footer> 语义化标签表示页脚
+            通常包含版权、联系方式、次要导航等
+        -->
+        <footer>
+            <p>&copy; 2025 HTML 深度学习实践 | 理解原理，掌握本质</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                基于 HTML Living Standard | 
+                <a href="https://html.spec.whatwg.org/" style="color: #68d391;">WHATWG 规范</a>
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // 模块 2: 脚本加载演示
+        console.log('✅ 脚本执行时，DOM 已完全解析（因为在 body 底部）');
+        
+        // Canvas 绘制演示
+        const canvas = document.getElementById('myCanvas');
+        if (canvas.getContext) {
+            const ctx = canvas.getContext('2d');
+            
+            // 渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 400, 200);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 200);
+            
+            // 绘制圆形
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.arc(200, 100, 50, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 文字
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Canvas', 200, 110);
+        }
+        
+        // 模块 4: 表单验证演示
+        const form = document.getElementById('demo-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 使用约束验证 API
+            if (!form.checkValidity()) {
+                // 找到第一个无效字段
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    alert('请检查表单：' + firstInvalid.validationMessage);
+                }
+                return;
+            }
+            
+            // 表单有效
+            alert('✅ 表单验证通过！\n\n这展示了 HTML5 原生验证的强大功能。');
+        });
+        
+        // 实时显示验证状态
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.validity.valid) {
+                    console.log(`✅ ${this.name} 验证通过`);
+                } else {
+                    console.log(`❌ ${this.name} 验证失败: ${this.validationMessage}`);
+                }
+            });
+        });
+        
+        // 模块 2: 性能监测
+        window.addEventListener('load', function() {
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                const domReadyTime = perfData.domContentLoadedEventEnd - perfData.navigationStart;
+                
+                console.log('📊 性能指标:');
+                console.log(`- DOM Ready: ${domReadyTime}ms`);
+                console.log(`- Page Load: ${pageLoadTime}ms`);
+                console.log(`- DOM 解析: ${perfData.domComplete - perfData.domLoading}ms`);
+            }
+        });
+    </script>
+</body>
+</html>
