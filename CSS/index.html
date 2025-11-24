@@ -35,6 +35,8 @@
         <button class="tab-button" data-tab="bfc">🔲 BFC</button>
         <button class="tab-button" data-tab="stacking">📚 层叠上下文</button>
         <button class="tab-button" data-tab="performance">⚡ 性能优化</button>
+        <button class="tab-button" data-tab="specificity">⚖️ 优先级</button>
+        <button class="tab-button" data-tab="values">🔢 值计算</button>
       </nav>
 
       <!-- Tab 1: 选择器引擎演示 -->
@@ -389,6 +391,116 @@
       </div>
     </div>
 
+      <!-- Tab 6: 优先级演示 -->
+      <div class="demo-section" id="tab-specificity" style="display: none">
+        <h2>6. 层叠与优先级 (Cascade & Specificity)</h2>
+        <div class="demo-container">
+          <div class="explanation">
+            <h3>谁说了算？</h3>
+            <p>当多个规则应用到同一个元素时，浏览器通过<b>特异性 (Specificity)</b> 来决定使用哪个样式。</p>
+          </div>
+
+          <div class="specificity-demo">
+            <div class="battle-arena">
+              <div class="contestant">
+                <h4>选择器 A</h4>
+                <input type="text" id="specInputA" value="#nav .list li" placeholder="输入选择器...">
+                <div class="spec-score" id="specScoreA">(0, 1, 1, 1)</div>
+              </div>
+              <div class="vs">VS</div>
+              <div class="contestant">
+                <h4>选择器 B</h4>
+                <input type="text" id="specInputB" value="div ul li a" placeholder="输入选择器...">
+                <div class="spec-score" id="specScoreB">(0, 0, 0, 4)</div>
+              </div>
+            </div>
+            
+            <div class="winner-display" id="specWinner">
+              🏆 胜者：选择器 A
+            </div>
+
+            <div class="spec-rules">
+              <h4>计算规则 (ID, 类, 标签)</h4>
+              <ul>
+                <li><span class="badge id">ID</span> = 100 分</li>
+                <li><span class="badge class">类/属性/伪类</span> = 10 分</li>
+                <li><span class="badge tag">标签/伪元素</span> = 1 分</li>
+                <li><span class="badge inline">内联样式</span> = 1000 分</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 7: 值计算演示 -->
+      <div class="demo-section" id="tab-values" style="display: none">
+        <h2>7. CSS 值的计算过程</h2>
+        <div class="demo-container">
+          <div class="explanation">
+            <h3>从 CSS 代码到像素值</h3>
+            <p>浏览器需要经过 6 个步骤将 CSS 值转换为最终的像素值。</p>
+          </div>
+
+          <div class="value-pipeline-demo">
+            <div class="pipeline-controls">
+              <label>父元素字体大小: <input type="range" id="parentFontSlider" min="10" max="30" value="16"> <span id="parentFontVal">16px</span></label>
+              <label>子元素宽度设置: <select id="childWidthSelect">
+                <option value="50%">50%</option>
+                <option value="200px">200px</option>
+                <option value="auto">auto</option>
+              </select></label>
+            </div>
+
+            <div class="pipeline-steps">
+              <div class="p-step">
+                <div class="p-title">1. Declared</div>
+                <div class="p-desc">声明值</div>
+                <div class="p-val" id="valDeclared">50%</div>
+              </div>
+              <div class="p-arrow">→</div>
+              <div class="p-step">
+                <div class="p-title">2. Cascaded</div>
+                <div class="p-desc">层叠值</div>
+                <div class="p-val" id="valCascaded">50%</div>
+              </div>
+              <div class="p-arrow">→</div>
+              <div class="p-step">
+                <div class="p-title">3. Specified</div>
+                <div class="p-desc">指定值</div>
+                <div class="p-val" id="valSpecified">50%</div>
+              </div>
+              <div class="p-arrow">→</div>
+              <div class="p-step">
+                <div class="p-title">4. Computed</div>
+                <div class="p-desc">计算值</div>
+                <div class="p-val" id="valComputed">50%</div>
+              </div>
+              <div class="p-arrow">→</div>
+              <div class="p-step highlight">
+                <div class="p-title">5. Used</div>
+                <div class="p-desc">使用值</div>
+                <div class="p-val" id="valUsed">400px</div>
+              </div>
+              <div class="p-arrow">→</div>
+              <div class="p-step">
+                <div class="p-title">6. Actual</div>
+                <div class="p-desc">实际值</div>
+                <div class="p-val" id="valActual">400px</div>
+              </div>
+            </div>
+            
+            <div class="pipeline-visual">
+              <div class="p-parent" id="pParent" style="width: 800px; font-size: 16px;">
+                Parent (Width: 800px)
+                <div class="p-child" id="pChild" style="width: 50%;">Child</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
     <script>
       // Tab 切换功能
       const tabs = document.querySelectorAll(".tab-button");
@@ -626,6 +738,129 @@
         }, 2000);
       }
 
+      // ========== 优先级演示 ==========
+      function calculateSpecificity(selector) {
+        if (!selector) return [0, 0, 0];
+        
+        // 简单估算：不完美，但足以演示原理
+        const ids = (selector.match(/#[a-zA-Z0-9_-]+/g) || []).length;
+        const classes = (selector.match(/\.[a-zA-Z0-9_-]+/g) || []).length;
+        const attribs = (selector.match(/\[.+?\]/g) || []).length;
+        const pseudos = (selector.match(/:[a-zA-Z0-9_-]+/g) || []).length;
+        // 排除伪类中的 :: (伪元素)
+        const pseudoElements = (selector.match(/::[a-zA-Z0-9_-]+/g) || []).length;
+        
+        // 标签：简单处理，排除 . # [ :
+        // 这只是一个演示用的近似算法
+        const parts = selector.split(/[\s>+~]+/);
+        let tags = 0;
+        parts.forEach(part => {
+          if (part && !part.startsWith('.') && !part.startsWith('#') && !part.startsWith('[') && !part.startsWith(':')) {
+            tags++;
+          }
+        });
+        
+        // 修正伪类计数（减去伪元素）
+        const b = classes + attribs + (pseudos - pseudoElements);
+        const c = tags + pseudoElements;
+        
+        return [ids, b, c];
+      }
+
+      function updateSpecificity() {
+        const selA = document.getElementById('specInputA').value;
+        const selB = document.getElementById('specInputB').value;
+        
+        const specA = calculateSpecificity(selA);
+        const specB = calculateSpecificity(selB);
+        
+        document.getElementById('specScoreA').textContent = `(${specA.join(', ')})`;
+        document.getElementById('specScoreB').textContent = `(${specB.join(', ')})`;
+        
+        // 比较
+        let winner = '平局';
+        let winnerId = '';
+        
+        // 比较逻辑
+        if (specA[0] !== specB[0]) {
+            winner = specA[0] > specB[0] ? '选择器 A' : '选择器 B';
+            winnerId = specA[0] > specB[0] ? 'A' : 'B';
+        } else if (specA[1] !== specB[1]) {
+            winner = specA[1] > specB[1] ? '选择器 A' : '选择器 B';
+            winnerId = specA[1] > specB[1] ? 'A' : 'B';
+        } else if (specA[2] !== specB[2]) {
+            winner = specA[2] > specB[2] ? '选择器 A' : '选择器 B';
+            winnerId = specA[2] > specB[2] ? 'A' : 'B';
+        }
+        
+        const winnerEl = document.getElementById('specWinner');
+        winnerEl.textContent = `🏆 胜者：${winner}`;
+        
+        if (winnerId === 'A') {
+          winnerEl.className = 'winner-display win-a';
+        } else if (winnerId === 'B') {
+          winnerEl.className = 'winner-display win-b';
+        } else {
+          winnerEl.className = 'winner-display';
+        }
+      }
+      
+      document.getElementById('specInputA').addEventListener('input', updateSpecificity);
+      document.getElementById('specInputB').addEventListener('input', updateSpecificity);
+      updateSpecificity(); // Init
+
+      // ========== 值计算演示 ==========
+      function updateValuePipeline() {
+        const parentFont = parseInt(document.getElementById('parentFontSlider').value);
+        const widthSetting = document.getElementById('childWidthSelect').value;
+        
+        document.getElementById('parentFontVal').textContent = `${parentFont}px`;
+        document.getElementById('pParent').style.fontSize = `${parentFont}px`;
+        
+        // 1. Declared
+        document.getElementById('valDeclared').textContent = widthSetting;
+        
+        // 2. Cascaded (假设没有其他冲突)
+        document.getElementById('valCascaded').textContent = widthSetting;
+        
+        // 3. Specified (处理 auto 等默认值)
+        let specified = widthSetting;
+        if (widthSetting === 'auto') specified = 'auto';
+        document.getElementById('valSpecified').textContent = specified;
+        
+        // 4. Computed (相对值转绝对值，但 % 在 computed 阶段通常保留，除非是 font-size)
+        // 对于 width，computed value 如果是 %，通常保留 %，直到 layout 阶段 (Used Value)
+        // 但为了演示简单，我们这里显示 "50%" 或 "200px"
+        document.getElementById('valComputed').textContent = specified;
+        
+        // 5. Used (布局计算，解析 %)
+        const parentWidth = 800;
+        let used = 0;
+        if (widthSetting.includes('%')) {
+          const percent = parseInt(widthSetting) / 100;
+          used = parentWidth * percent;
+        } else if (widthSetting.includes('px')) {
+          used = parseInt(widthSetting);
+        } else {
+          // auto -> fill available (simplified)
+          used = parentWidth; 
+        }
+        document.getElementById('valUsed').textContent = `${used}px`;
+        
+        // 6. Actual (取整等)
+        const actual = Math.round(used); // 简单演示
+        document.getElementById('valActual').textContent = `${actual}px`;
+        
+        // Update Visual
+        const child = document.getElementById('pChild');
+        child.style.width = widthSetting;
+        if (widthSetting === 'auto') child.style.width = '100%';
+      }
+      
+      document.getElementById('parentFontSlider').addEventListener('input', updateValuePipeline);
+      document.getElementById('childWidthSelect').addEventListener('change', updateValuePipeline);
+      updateValuePipeline(); // Init
+
       // 初始化提示
       console.log(
         "%c🎨 CSS 底层原理演示",
@@ -636,5 +871,8 @@
         "font-size: 14px; color: #764ba2;"
       );
     </script>
+    <footer style="text-align: center; margin-top: 3rem; padding-bottom: 2rem; color: white; opacity: 0.8;">
+      <p>想了解更多理论细节？请阅读 <a href="README.md" style="color: white; text-decoration: underline;">README.md</a></p>
+    </footer>
   </body>
 </html>
