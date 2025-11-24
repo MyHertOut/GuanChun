@@ -1,0 +1,741 @@
+/* CSS 底层原理演示 - 样式文件 */
+
+/* 全局样式 */
+.css-fundamentals-demo {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.css-fundamentals-demo h1 {
+  text-align: center;
+  color: white;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab 导航 */
+.tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 演示区域 */
+.demo-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.demo-section h2 {
+  color: #667eea;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+
+.demo-container {
+  margin-top: 1rem;
+}
+
+.explanation {
+  background: #ebf4ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  margin-bottom: 2rem;
+}
+
+.explanation h3 {
+  color: #667eea;
+  margin-bottom: 0.5rem;
+}
+
+/* ========== 选择器演示 ========== */
+.selector-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.selector-input {
+  grid-column: 1 / -1;
+}
+
+.selector-input input {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  font-family: 'Courier New', monospace;
+}
+
+.selector-input input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.matching-steps {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.matching-steps h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0.8rem 0;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.step-content {
+  flex: 1;
+  color: #2d3748;
+  line-height: 1.6;
+}
+
+.dom-tree {
+  background: #1a202c;
+  color: #68d391;
+  padding: 1.5rem;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.dom-tree h4 {
+  color: #90cdf4;
+  margin-bottom: 1rem;
+}
+
+.tree .node {
+  margin-left: 1.5rem;
+  padding: 0.3rem 0;
+  border-left: 2px solid #4a5568;
+  padding-left: 1rem;
+}
+
+.tree .node.child {
+  margin-left: 2rem;
+}
+
+.tree .node.highlight {
+  background: rgba(104, 211, 145, 0.2);
+  border-left-color: #68d391;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.performance-comparison {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.performance-comparison h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.comparison-item {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.comparison-item.good {
+  background: #dcfce7;
+  border: 2px solid #16a34a;
+}
+
+.comparison-item.medium {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+}
+
+.comparison-item.bad {
+  background: #fee2e2;
+  border: 2px solid #dc2626;
+}
+
+.comparison-item .label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.comparison-item code {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.comparison-item .complexity {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: 'Courier New', monospace;
+}
+
+/* ========== 盒模型演示 ========== */
+.box-controls {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.box-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.box-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.setting label {
+  display: block;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.setting input[type="range"] {
+  width: 100%;
+}
+
+.box-visualization {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.margin-box {
+  position: relative;
+  display: inline-block;
+}
+
+.margin-label,
+.border-label,
+.padding-label,
+.content-label {
+  position: absolute;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.margin-label {
+  top: -15px;
+  left: 5px;
+  color: #b45309;
+}
+
+.border-label {
+  top: -15px;
+  left: 5px;
+  color: #ea580c;
+}
+
+.padding-label {
+  top: -15px;
+  left: 5px;
+  color: #f59e0b;
+}
+
+.content-label {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  text-align: center;
+  font-size: 0.9rem;
+  position: static;
+  padding: 0.5rem;
+}
+
+.box-calculation {
+  background: #ebf4ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.box-calculation h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.calc-result {
+  font-family: 'Courier New', monospace;
+  line-height: 2;
+}
+
+.calc-result > div {
+  padding: 0.5rem;
+  background: white;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+}
+
+/* ========== BFC 演示 ========== */
+.bfc-demo {
+  margin: 2rem 0;
+}
+
+.demo-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.demo-case {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.demo-case label {
+  display: block;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.demo-case select {
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e0;
+}
+
+.container-no-bfc {
+  border: 3px dashed #dc2626;
+  padding: 0.5rem;
+  background: #fee2e2;
+  /* 高度塌陷 */
+}
+
+.container-with-bfc {
+  border: 3px dashed #16a34a;
+  padding: 0.5rem;
+  background: #dcfce7;
+}
+
+.container-with-bfc.overflow {
+  overflow: hidden;
+}
+
+.container-with-bfc.display {
+  display: flow-root;
+}
+
+.container-with-bfc.float {
+  float: left;
+  width: 100%;
+}
+
+.float-child {
+  float: left;
+  width: 100px;
+  height: 80px;
+  margin: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.height-info {
+  clear: both;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+}
+
+.bfc-features,
+.bfc-triggers {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.bfc-features h4,
+.bfc-triggers h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.bfc-features ul {
+  list-style: none;
+  padding: 0;
+}
+
+.bfc-features li {
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.trigger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trigger-list code {
+  display: inline-block;
+  background: #1a202c;
+  color: #68d391;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* ========== 层叠上下文演示 ========== */
+.stacking-demo {
+  margin: 2rem 0;
+}
+
+.stacking-container {
+  position: relative;
+  height: 400px;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.layer {
+  position: absolute;
+  width: 200px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.layer:nth-child(1) { top: 50px; left: 50px; }
+.layer:nth-child(2) { top: 80px; left: 100px; }
+.layer:nth-child(3) { top: 110px; left: 150px; }
+.layer:nth-child(4) { top: 140px; left: 200px; }
+.layer:nth-child(5) { top: 170px; left: 250px; }
+
+.layer:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.stacking-order {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #ebf4ff;
+  border-radius: 8px;
+}
+
+.stacking-order h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.order-list {
+  line-height: 2;
+  padding-left: 2rem;
+}
+
+.order-list li {
+  padding: 0.25rem 0;
+}
+
+.stacking-trap {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fef3c7;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.stacking-trap h4 {
+  color: #b45309;
+  margin-bottom: 1rem;
+}
+
+.trap-demo {
+  margin-top: 1rem;
+}
+
+.parent-context {
+  position: relative;
+  transform: translateZ(0); /* 创建层叠上下文 */
+  background: #fed7aa;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #f59e0b;
+}
+
+.child-high-z {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  z-index: 9999; /* 无效！只在父元素的层叠上下文内 */
+  background: #fbbf24;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
+}
+
+.note {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #78350f;
+  font-style: italic;
+}
+
+/* ========== 性能优化演示 ========== */
+.performance-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.perf-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 3px solid;
+}
+
+.perf-card.bad {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.perf-card.medium {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.perf-card.good {
+  background: #dcfce7;
+  border-color: #16a34a;
+}
+
+.perf-card h4 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.code-block {
+  background: #1a202c;
+  color: #68d391;
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  white-space: pre-wrap;
+}
+
+.impact {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.optimization-tips {
+  background: #ebf4ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.optimization-tips h4 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.optimization-tips ul {
+  line-height: 2;
+  padding-left: 1.5rem;
+}
+
+.live-demo-performance {
+  background: #f8fafc;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.demo-btn {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0.5rem;
+  color: white;
+  transition: all 0.3s;
+}
+
+.demo-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.demo-btn.bad {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.demo-btn.medium {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.demo-btn.good {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.perf-box {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 2rem auto;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+}
+
+.perf-result {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #ebf4ff;
+  border-radius: 8px;
+  font-weight: bold;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .selector-demo,
+  .demo-comparison {
+    grid-template-columns: 1fr;
+  }
+  
+  .css-fundamentals-demo {
+    padding: 1rem;
+  }
+  
+  .css-fundamentals-demo h1 {
+    font-size: 1.8rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
