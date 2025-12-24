@@ -1,0 +1,164 @@
+[
+  {
+    "id": "S001",
+    "name": "月光",
+    "element": "妖灵",
+    "type": "辅助",
+    "power": 0,
+    "cost": 5,
+    "description": "沐浴月光，缓慢恢复体力。"
+  },
+  {
+    "id": "S002",
+    "name": "爪击",
+    "element": "兽",
+    "type": "物理",
+    "power": 40,
+    "cost": 5,
+    "description": "用爪子进行普通的攻击。"
+  },
+  {
+    "id": "S003",
+    "name": "撕裂爪",
+    "element": "兽",
+    "type": "物理",
+    "power": 60,
+    "cost": 10,
+    "description": "用锋利的爪子攻击敌人，有概率造成流血效果。"
+  },
+  {
+    "id": "S004",
+    "name": "月影",
+    "element": "妖灵",
+    "type": "辅助",
+    "power": 0,
+    "cost": 15,
+    "description": "提升闪避率，像影子一样难以捕捉。"
+  },
+  {
+    "id": "S005",
+    "name": "冕焰爪",
+    "element": "火",
+    "type": "物理",
+    "power": 80,
+    "cost": 20,
+    "description": "附带灼烧效果的强力爪击。"
+  },
+  {
+    "id": "S006",
+    "name": "邪焰",
+    "element": "火",
+    "type": "魔法",
+    "power": 90,
+    "cost": 25,
+    "description": "无法被普通水熄灭的妖异火焰，持续造成伤害。"
+  },
+  {
+    "id": "S007",
+    "name": "瞬步",
+    "element": "兽",
+    "type": "辅助",
+    "power": 0,
+    "cost": 10,
+    "description": "瞬间移动一段距离，大幅提升速度。"
+  },
+  {
+    "id": "S101",
+    "name": "冰墙",
+    "element": "冰",
+    "type": "防御",
+    "power": 0,
+    "cost": 15,
+    "description": "凝聚冰元素制造一道冰墙，抵挡伤害。"
+  },
+  {
+    "id": "S102",
+    "name": "冰空舞",
+    "element": "冰",
+    "type": "魔法",
+    "power": 50,
+    "cost": 10,
+    "description": "在空中舞动，召唤冰晶攻击敌人。"
+  },
+  {
+    "id": "S103",
+    "name": "冻结",
+    "element": "冰",
+    "type": "控制",
+    "power": 0,
+    "cost": 20,
+    "description": "尝试冻结敌人，使其无法行动。"
+  },
+  {
+    "id": "S104",
+    "name": "冰刃",
+    "element": "冰",
+    "type": "魔法",
+    "power": 70,
+    "cost": 15,
+    "description": "凝聚锐利的冰刃射向敌人。"
+  },
+  {
+    "id": "S201",
+    "name": "龙舞",
+    "element": "龙",
+    "type": "辅助",
+    "power": 0,
+    "cost": 20,
+    "description": "神秘的龙族舞蹈，提升攻击和速度。"
+  },
+  {
+    "id": "S202",
+    "name": "幽灵爪",
+    "element": "鬼",
+    "type": "物理",
+    "power": 75,
+    "cost": 15,
+    "description": "带有幽灵属性的爪击，无视部分防御。"
+  },
+  {
+    "id": "S203",
+    "name": "隐袭",
+    "element": "虫",
+    "type": "物理",
+    "power": 60,
+    "cost": 10,
+    "description": "进入隐身状态后发动的突袭。"
+  },
+  {
+    "id": "S301",
+    "name": "根须缠绕",
+    "element": "木",
+    "type": "控制",
+    "power": 20,
+    "cost": 10,
+    "description": "召唤根须缠绕敌人，限制其移动。"
+  },
+  {
+    "id": "S302",
+    "name": "叶刃",
+    "element": "木",
+    "type": "物理",
+    "power": 55,
+    "cost": 10,
+    "description": "像飞刀一样锋利的树叶攻击。"
+  },
+  {
+    "id": "S303",
+    "name": "吸取",
+    "element": "木",
+    "type": "魔法",
+    "power": 40,
+    "cost": 10,
+    "description": "攻击敌人并回复造成伤害一半的体力。"
+  },
+  {
+    "id": "S304",
+    "name": "硬化",
+    "element": "木",
+    "type": "防御",
+    "power": 0,
+    "cost": 10,
+    "description": "使树皮硬化，提升防御力。"
+  }
+]

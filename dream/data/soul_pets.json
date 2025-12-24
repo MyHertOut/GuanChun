@@ -1,0 +1,355 @@
+[
+  {
+    "id": "1001",
+    "name": "月光狐",
+    "rank": "奴仆级",
+    "elements": ["妖灵"],
+    "description": "一种高贵的狐族魂宠，拥有银色的毛发和优雅的身姿，喜欢在夜晚吸收月光精华。",
+    "base_stats": {
+      "health": 60,
+      "stamina": 80,
+      "attack": 15,
+      "defense": 10,
+      "speed": 25
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S001",
+        "name": "月光"
+      },
+      {
+        "learn_level": 5,
+        "skill_id": "S003",
+        "name": "撕裂爪"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "1002",
+        "type": "evolution",
+        "condition": {
+          "min_level": 20,
+          "description": "正常成长进化"
+        }
+      },
+      {
+        "target_id": "1005",
+        "type": "mutation",
+        "condition": {
+          "description": "濒死状态下爆发强大的求生欲，且拥有极高的资质"
+        }
+      }
+    ]
+  },
+  {
+    "id": "1002",
+    "name": "冕焰之狐",
+    "rank": "战将级",
+    "elements": ["火", "妖灵"],
+    "description": "月光狐的进化形态，四肢踏着高贵的冕焰，战斗力大幅提升。",
+    "base_stats": {
+      "health": 120,
+      "stamina": 150,
+      "attack": 35,
+      "defense": 25,
+      "speed": 40
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S005",
+        "name": "冕焰爪"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "1003",
+        "type": "evolution",
+        "condition": {
+          "min_level": 40
+        }
+      }
+    ]
+  },
+  {
+    "id": "1003",
+    "name": "三尾炎狐",
+    "rank": "统领级",
+    "elements": ["火", "妖灵"],
+    "description": "拥有三条尾巴的强大狐族，火焰掌控能力极强。",
+    "base_stats": {
+      "health": 250,
+      "stamina": 300,
+      "attack": 80,
+      "defense": 60,
+      "speed": 70
+    },
+    "evolutions": [
+      {
+        "target_id": "1004",
+        "type": "evolution",
+        "condition": {
+          "min_level": 60
+        }
+      }
+    ]
+  },
+  {
+    "id": "1004",
+    "name": "六尾妖狐",
+    "rank": "君主级",
+    "elements": ["火", "妖灵"],
+    "description": "君主级的存在，六条尾巴舞动间可以毁灭一支军队。",
+    "base_stats": {
+      "health": 800,
+      "stamina": 900,
+      "attack": 200,
+      "defense": 150,
+      "speed": 180
+    },
+    "evolutions": []
+  },
+  {
+    "id": "1005",
+    "name": "邪焰六尾妖狐",
+    "rank": "战将级",
+    "elements": ["火", "妖灵"],
+    "description": "传说中的异变生物，虽然只有战将级，却拥有堪比君主级的潜力和外形。银色的毛发与妖异的邪焰共存。",
+    "base_stats": {
+      "health": 150,
+      "stamina": 200,
+      "attack": 50,
+      "defense": 30,
+      "speed": 60
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S006",
+        "name": "邪焰"
+      },
+      {
+        "learn_level": 10,
+        "skill_id": "S007",
+        "name": "瞬步"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "1004",
+        "type": "evolution",
+        "condition": {
+          "description": "随等级提升，力量逐渐解封"
+        }
+      }
+    ]
+  },
+  {
+    "id": "2001",
+    "name": "小蛰龙",
+    "rank": "统领级",
+    "elements": ["虫", "龙", "鬼"],
+    "description": "平时伪装成不起眼的小虫子，实际拥有强大的龙族和鬼系血统。",
+    "base_stats": {
+      "health": 180,
+      "stamina": 120,
+      "attack": 85,
+      "defense": 50,
+      "speed": 90
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S203",
+        "name": "隐袭"
+      },
+      {
+        "learn_level": 10,
+        "skill_id": "S202",
+        "name": "幽灵爪"
+      },
+      {
+        "learn_level": 20,
+        "skill_id": "S201",
+        "name": "龙舞"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "2002",
+        "type": "evolution",
+        "condition": {
+          "min_level": 50,
+          "description": "化茧成蝶，展现真龙姿态"
+        }
+      }
+    ]
+  },
+  {
+    "id": "2002",
+    "name": "青蛰龙",
+    "rank": "统领级",
+    "elements": ["虫", "龙", "鬼"],
+    "description": "褪去了伪装，展现出青色的龙鳞，速度与攻击力惊人。",
+    "base_stats": {
+      "health": 350,
+      "stamina": 250,
+      "attack": 160,
+      "defense": 100,
+      "speed": 180
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S201",
+        "name": "龙舞"
+      },
+      {
+        "learn_level": 5,
+        "skill_id": "S202",
+        "name": "幽灵爪"
+      }
+    ],
+    "evolutions": []
+  },
+  {
+    "id": "3001",
+    "name": "冰空精灵",
+    "rank": "战将级",
+    "elements": ["冰"],
+    "description": "生活在冰雪世界的精灵，能够自由操控冰元素。",
+    "base_stats": {
+      "health": 90,
+      "stamina": 140,
+      "attack": 20,
+      "defense": 20,
+      "speed": 50
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S101",
+        "name": "冰墙"
+      },
+      {
+        "learn_level": 5,
+        "skill_id": "S104",
+        "name": "冰刃"
+      },
+      {
+        "learn_level": 15,
+        "skill_id": "S102",
+        "name": "冰空舞"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "3002",
+        "type": "evolution",
+        "condition": {
+          "min_level": 30
+        }
+      }
+    ]
+  },
+  {
+    "id": "3002",
+    "name": "琉璃冰精灵",
+    "rank": "统领级",
+    "elements": ["冰"],
+    "description": "身体如琉璃般剔透，对冰元素的掌控达到了新的高度。",
+    "base_stats": {
+      "health": 200,
+      "stamina": 300,
+      "attack": 50,
+      "defense": 50,
+      "speed": 90
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S103",
+        "name": "冻结"
+      },
+      {
+        "learn_level": 10,
+        "skill_id": "S102",
+        "name": "冰空舞"
+      }
+    ],
+    "evolutions": []
+  },
+  {
+    "id": "4001",
+    "name": "魔树战士",
+    "rank": "战将级",
+    "elements": ["木"],
+    "description": "拥有强大生命力的植物系魂宠，身体坚硬如铁。",
+    "base_stats": {
+      "health": 200,
+      "stamina": 160,
+      "attack": 40,
+      "defense": 80,
+      "speed": 10
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S301",
+        "name": "根须缠绕"
+      },
+      {
+        "learn_level": 5,
+        "skill_id": "S304",
+        "name": "硬化"
+      },
+      {
+        "learn_level": 10,
+        "skill_id": "S303",
+        "name": "吸取"
+      },
+      {
+        "learn_level": 15,
+        "skill_id": "S302",
+        "name": "叶刃"
+      }
+    ],
+    "evolutions": [
+      {
+        "target_id": "4002",
+        "type": "evolution",
+        "condition": {
+          "min_level": 35
+        }
+      }
+    ]
+  },
+  {
+    "id": "4002",
+    "name": "魔树统领",
+    "rank": "统领级",
+    "elements": ["木"],
+    "description": "体型巨大的战争机器，无数的根须和枝条可以同时攻击多个敌人。",
+    "base_stats": {
+      "health": 500,
+      "stamina": 400,
+      "attack": 100,
+      "defense": 200,
+      "speed": 20
+    },
+    "skills": [
+      {
+        "learn_level": 1,
+        "skill_id": "S301",
+        "name": "根须缠绕"
+      },
+      {
+        "learn_level": 10,
+        "skill_id": "S303",
+        "name": "吸取"
+      }
+    ],
+    "evolutions": []
+  }
+]
