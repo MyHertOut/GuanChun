@@ -40,7 +40,7 @@ const createCharacter = () => {
     pets: [starterPet],
     inventory: [
         { ...itemsData.find(i => i.id === 'I001'), count: 5 }, // 5 Potions
-        { ...itemsData.find(i => i.id === 'I101'), count: 1 }  // 1 Core
+        { ...itemsData.find(i => i.id === 'I101'), count: 1000 }  // 1 Core
     ],
     createdAt: Date.now()
   };
