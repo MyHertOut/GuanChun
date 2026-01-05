@@ -1,5 +1,5 @@
 # 当我需要创建一个新的前端项目时，我会使用这个标准模板。我们需要确保模板中用到的技术不过时。
-# 使用 pnpm 安装依赖
+# 使用 pnpm 包管理工具
 # 使用 pnpm create vue@latest 初始项目
 # 根据 前端标准模板 建立项目架构
 
@@ -102,35 +102,6 @@ src/
 
 - **Node.js**: >= 18.0.0 (推荐 LTS)
 - **pnpm**: >= 8.0.0
-
-### 安装步骤
-
-1.  **克隆项目**
-
-    ```bash
-    git clone <repository-url>
-    cd <project-name>
-    ```
-
-2.  **安装依赖**
-
-    ```bash
-    pnpm install
-    ```
-
-3.  **配置环境变量**
-
-    复制 `.env.example` 为 `.env` 并修改配置：
-
-    ```bash
-    cp .env.example .env
-    ```
-
-4.  **启动开发服务器**
-
-    ```bash
-    pnpm dev
-    ```
 
 ## ⚙️ 环境变量说明
 

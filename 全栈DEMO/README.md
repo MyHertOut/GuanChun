@@ -22,31 +22,32 @@
 
 ## 🚀 项目初始化指南
 
-### 1. 创建新前端项目
+### 1. 交互式创建 (推荐)
+
+直接运行脚本，按照提示选择项目类型（前端/后端/全栈）并输入项目名称：
 
 ```bash
-# 语法示例
-front <ProjectName>
+node scripts/init.js
+```
+
+### 2. 命令行快速创建
+
+如果你更喜欢命令行参数，也可以直接指定：
+
+```bash
+# 创建前端项目
+node scripts/init.js front <ProjectName>
+
+# 创建后端项目
+node scripts/init.js server <ProjectName>
 ```
 
 **执行逻辑说明**:
 
-1.  **源模板**: 锁定 `front/` 目录作为基准模板。
-2.  **目标路径**: 在 `front/` 同级目录下创建新目录，命名格式为 `front-<ProjectName>`。
-3.  **结果**: 新项目 `front-<ProjectName>` 将完整继承标准模板的所有架构、配置与依赖。
-
-### 2. 创建新后端项目
-
-```bash
-# 语法示例
-server <ProjectName>
-```
-
-**执行逻辑说明**:
-
-1.  **源模板**: 锁定 `server/` 目录作为基准模板。
-2.  **目标路径**: 在 `server/` 同级目录下创建新目录，命名格式为 `server-<ProjectName>`。
-3.  **结果**: 新项目 `server-<ProjectName>` 将完整继承标准模板的所有架构、配置与依赖。
+1.  **源模板**: 锁定 `front/` 或 `server/` 目录作为基准模板。
+2.  **目标路径**: 在根目录下创建新目录，命名格式为 `front-<ProjectName>` 或 `server-<ProjectName>`。
+3.  **结果**: 新项目将完整继承标准模板的所有架构、配置与依赖。
+4.  **AI 辅助**: 脚本执行完毕后会输出一段 **[AI Context]**，你可以将其复制给 AI 助手，让其快速理解新项目的结构与依赖。
 
 ---
 

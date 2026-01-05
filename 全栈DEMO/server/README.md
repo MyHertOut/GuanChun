@@ -95,37 +95,19 @@ src/
 - **MySQL**: >= 8.0
 - **pnpm**: >= 8.0.0
 
-### 安装步骤
+<!-- 服务启动后，访问 Swagger 文档：`http://localhost:3000/api/docs` -->
 
-1.  **克隆项目**
+## ⚙️ 环境变量说明
 
-    ```bash
-    git clone <repository-url>
-    cd <project-name>
-    ```
-
-2.  **安装依赖**
-
-    ```bash
-    pnpm install
-    ```
-
-3.  **配置环境变量**
-
-    复制 `.env.example` 为 `.env` 并修改数据库配置：
-
-    ```bash
-    cp .env.example .env
-    ```
-
-4.  **启动开发服务器**
-
-    ```bash
-    # 启动开发模式 (Watch Mode)
-    pnpm start:dev
-    ```
-
-    服务启动后，访问 Swagger 文档：`http://localhost:3000/api/docs`
+| 变量名 | 说明 | 默认值 |
+| :--- | :--- | :--- |
+| `PORT` | 服务端口 | `3000` |
+| `DB_HOST` | 数据库主机 | `localhost` |
+| `DB_PORT` | 数据库端口 | `3306` |
+| `DB_USERNAME` | 数据库用户 | `root` |
+| `DB_PASSWORD` | 数据库密码 | - |
+| `DB_DATABASE` | 数据库名 | - |
+| `JWT_SECRET` | JWT 密钥 | - |
 
 ## 📜 脚本说明
 
