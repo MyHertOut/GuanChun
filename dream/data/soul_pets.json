@@ -187,33 +187,6 @@
     ]
   },
   {
-    "id": "2002",
-    "name": "青蛰龙",
-    "rank": "统领级",
-    "elements": ["虫", "龙", "鬼"],
-    "description": "褪去了伪装，展现出青色的龙鳞，速度与攻击力惊人。",
-    "base_stats": {
-      "health": 350,
-      "stamina": 250,
-      "attack": 160,
-      "defense": 100,
-      "speed": 180
-    },
-    "skills": [
-      {
-        "learn_level": 1,
-        "skill_id": "S201",
-        "name": "龙舞"
-      },
-      {
-        "learn_level": 5,
-        "skill_id": "S202",
-        "name": "幽灵爪"
-      }
-    ],
-    "evolutions": []
-  },
-  {
     "id": "3001",
     "name": "冰空精灵",
     "rank": "战将级",
@@ -252,33 +225,6 @@
         }
       }
     ]
-  },
-  {
-    "id": "3002",
-    "name": "琉璃冰精灵",
-    "rank": "统领级",
-    "elements": ["冰"],
-    "description": "身体如琉璃般剔透，对冰元素的掌控达到了新的高度。",
-    "base_stats": {
-      "health": 200,
-      "stamina": 300,
-      "attack": 50,
-      "defense": 50,
-      "speed": 90
-    },
-    "skills": [
-      {
-        "learn_level": 1,
-        "skill_id": "S103",
-        "name": "冻结"
-      },
-      {
-        "learn_level": 10,
-        "skill_id": "S102",
-        "name": "冰空舞"
-      }
-    ],
-    "evolutions": []
   },
   {
     "id": "4001",
@@ -324,32 +270,5 @@
         }
       }
     ]
-  },
-  {
-    "id": "4002",
-    "name": "魔树统领",
-    "rank": "统领级",
-    "elements": ["木"],
-    "description": "体型巨大的战争机器，无数的根须和枝条可以同时攻击多个敌人。",
-    "base_stats": {
-      "health": 500,
-      "stamina": 400,
-      "attack": 100,
-      "defense": 200,
-      "speed": 20
-    },
-    "skills": [
-      {
-        "learn_level": 1,
-        "skill_id": "S301",
-        "name": "根须缠绕"
-      },
-      {
-        "learn_level": 10,
-        "skill_id": "S303",
-        "name": "吸取"
-      }
-    ],
-    "evolutions": []
   }
 ]

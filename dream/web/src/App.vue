@@ -1,14 +1,22 @@
-<script setup>
-import GameManager from './components/GameManager.vue'
+<script setup lang="ts">
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <GameManager />
+  <div class="min-h-screen bg-gray-100">
+    <RouterView />
+  </div>
 </template>
 
 <style>
-/* Global styles if needed */
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  background-color: #f3f4f6; /* gray-100 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 </style>
