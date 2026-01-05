@@ -104,7 +104,7 @@ function createProject(type, name) {
       console.log('   Running scaffold: create-vue (Vue 3 + TS + Vite)...');
       try {
         // Flags: --typescript --router --pinia --eslint --prettier --force
-        execSync(`npx create-vue@latest ${targetName} --typescript --router --pinia --eslint --prettier --force`, {
+        execSync(`npx -y create-vue@latest ${targetName} --typescript --router --pinia --eslint --prettier --force`, {
           cwd: rootDir,
           stdio: 'inherit'
         });
